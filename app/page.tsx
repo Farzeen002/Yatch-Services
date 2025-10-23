@@ -17,6 +17,7 @@ export default function Home() {
          <Features />
          <Testimonials />
       <Chatbot />
+      < Footer/>
       </main>
 )
 }
