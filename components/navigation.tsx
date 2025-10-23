@@ -4,16 +4,19 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { useState } from "react"
+import { useLanguage } from "@/lib/language-context"
+import LanguageToggle from "./language-toggle"
 
 export default function Navigation() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useLanguage()
 
   const links = [
-    { href: "/", label: "Home" },
-    { href: "/yachts", label: "Yachts" },
-    { href: "/bookings", label: "Bookings" },
-    { href: "/admin", label: "Admin" },
+    { href: "/", label: t("nav.home") },
+    { href: "/yachts", label: t("nav.yachts") },
+    { href: "/bookings", label: t("nav.bookings") },
+    { href: "/admin", label: t("nav.admin") },
   ]
 
   return (
@@ -28,7 +31,7 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-8">
+          <div className="hidden md:flex gap-8 items-center">
             {links.map((link) => (
               <Link
                 key={link.href}
@@ -42,12 +45,16 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
+            <LanguageToggle />
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <LanguageToggle />
+            <button className="p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
