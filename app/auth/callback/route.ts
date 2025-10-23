@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         user_email: user.email,
         username: user.user_metadata.full_name ?? '',
         profile_image: user.user_metadata.avatar_url ?? '',
-        role_type: 'admin' // Only used if first-time login
+        role_type: 'user' // Only used if first-time login
       })
     }
 

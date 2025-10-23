@@ -1,117 +1,145 @@
 "use client"
 
-import Link from "next/link"
-import { Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin, Anchor, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-foreground text-background py-16 px-4">
+    <footer className="bg-primary text-primary-foreground py-16 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <span className="text-foreground font-bold text-lg">M</span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 gradient-gold rounded-xl flex items-center justify-center">
+                <Anchor className="w-6 h-6 text-accent-foreground" />
               </div>
-              <span className="font-bold text-lg">Marina</span>
+              <span className="font-bold text-xl">Marina</span>
             </div>
-            <p className="text-background/70 text-sm">
-              Experience luxury yacht booking powered by AI. Your adventure awaits.
+            <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
+              Experience luxury yacht booking powered by AI. Your perfect ocean adventure is just a click away.
             </p>
+            <div className="flex gap-3">
+              <a href="#" className="w-10 h-10 rounded-lg bg-primary-foreground/10 hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-all">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-lg bg-primary-foreground/10 hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-all">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-lg bg-primary-foreground/10 hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-all">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-lg bg-primary-foreground/10 hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-all">
+                <Linkedin className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="font-bold text-lg mb-4">Quick Links</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/" className="text-background/70 hover:text-background transition-colors">
+                <a href="#home" className="text-primary-foreground/70 hover:text-accent transition-colors">
                   Home
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/yachts" className="text-background/70 hover:text-background transition-colors">
+                <a href="#yachts" className="text-primary-foreground/70 hover:text-accent transition-colors">
                   Browse Yachts
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/bookings" className="text-background/70 hover:text-background transition-colors">
-                  My Bookings
-                </Link>
+                <a href="#features" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                  Features
+                </a>
               </li>
               <li>
-                <Link href="/admin" className="text-background/70 hover:text-background transition-colors">
-                  Admin
-                </Link>
+                <a href="#testimonials" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                  Testimonials
+                </a>
               </li>
             </ul>
           </div>
 
           {/* Support */}
           <div>
-            <h4 className="font-bold mb-4">Support</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="font-bold text-lg mb-4">Support</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <Link href="#" className="text-background/70 hover:text-background transition-colors">
+                <a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">
                   Help Center
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#" className="text-background/70 hover:text-background transition-colors">
-                  Contact Us
-                </Link>
+                <a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                  Safety Guidelines
+                </a>
               </li>
               <li>
-                <Link href="#" className="text-background/70 hover:text-background transition-colors">
+                <a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="#" className="text-background/70 hover:text-background transition-colors">
+                <a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">
                   Terms of Service
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h4 className="font-bold mb-4">Contact</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-background/70">
-                <Mail size={16} />
-                <span>hello@marina.com</span>
+            <h4 className="font-bold text-lg mb-4">Contact Us</h4>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium mb-1">Email</div>
+                  <a href="mailto:support@marina.luxury" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                    support@marina.luxury
+                  </a>
+                </div>
               </li>
-              <li className="flex items-center gap-2 text-background/70">
-                <Phone size={16} />
-                <span>+1 (555) 123-4567</span>
+              <li className="flex items-start gap-3">
+                <Phone className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium mb-1">Phone</div>
+                  <a href="tel:+1234567890" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                    +1 (234) 567-890
+                  </a>
+                </div>
               </li>
-              <li className="flex items-center gap-2 text-background/70">
-                <MapPin size={16} />
-                <span>Miami, Florida</span>
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium mb-1">Address</div>
+                  <span className="text-primary-foreground/70">
+                    Marina Bay, Monaco 98000
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-background/20 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-background/70">
-            <p>&copy; 2025 Marina. All rights reserved.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="#" className="hover:text-background transition-colors">
-                Twitter
-              </Link>
-              <Link href="#" className="hover:text-background transition-colors">
-                Instagram
-              </Link>
-              <Link href="#" className="hover:text-background transition-colors">
-                LinkedIn
-              </Link>
-            </div>
+        <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-primary-foreground/60">
+            © 2024 Marina. All rights reserved.
+          </p>
+          <div className="flex gap-6 text-sm">
+            <a href="#" className="text-primary-foreground/60 hover:text-accent transition-colors">
+              Cookie Policy
+            </a>
+            <a href="#" className="text-primary-foreground/60 hover:text-accent transition-colors">
+              Accessibility
+            </a>
+            <a href="#" className="text-primary-foreground/60 hover:text-accent transition-colors">
+              Sitemap
+            </a>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -3,37 +3,21 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Menu, X } from "lucide-react"
-<<<<<<< HEAD
 import { useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Menu as HeadlessMenu } from "@headlessui/react"
-=======
-import { useState } from "react"
-import { useLanguage } from "@/lib/language-context"
-import LanguageToggle from "./language-toggle"
->>>>>>> 7a80281ede0cdc45355f2ea66299d4fbc415f05d
 
 export default function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const [isOpen, setIsOpen] = useState(false)
-<<<<<<< HEAD
   const [user, setUser] = useState<{ name: string; image: string; role: string } | null>(null)
 
   const links = [
     { href: "/", label: "Home" },
     { href: "/yachts", label: "Yachts" },
     { href: "/bookings", label: "Bookings" },
-=======
-  const { t } = useLanguage()
-
-  const links = [
-    { href: "/", label: t("nav.home") },
-    { href: "/yachts", label: t("nav.yachts") },
-    { href: "/bookings", label: t("nav.bookings") },
-    { href: "/admin", label: t("nav.admin") },
->>>>>>> 7a80281ede0cdc45355f2ea66299d4fbc415f05d
   ]
 
   // Fetch logged-in user info
@@ -81,11 +65,7 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Menu */}
-<<<<<<< HEAD
           <div className="hidden md:flex items-center gap-8">
-=======
-          <div className="hidden md:flex gap-8 items-center">
->>>>>>> 7a80281ede0cdc45355f2ea66299d4fbc415f05d
             {links.map((link) => (
               <Link
                 key={link.href}
@@ -99,7 +79,6 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
-<<<<<<< HEAD
 
             {/* Profile Dropdown */}
             {user && (
@@ -162,18 +141,6 @@ export default function Navigation() {
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-=======
-            <LanguageToggle />
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
-            <LanguageToggle />
-            <button className="p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
->>>>>>> 7a80281ede0cdc45355f2ea66299d4fbc415f05d
         </div>
 
         {/* Mobile Menu */}

@@ -3,6 +3,9 @@ import Navigation from "@/components/navigation"
 import HeroSection from "@/components/hero-section"
 import FeaturedYachts from "@/components/featured-yachts"
 import Footer from "@/components/footer"
+import Chatbot from "@/components/chatbot"
+import Features from "@/components/Features"
+import Testimonials from "@/components/Testimonials"
 
 
 export default function Home() {
@@ -11,8 +14,9 @@ export default function Home() {
       <Navigation />
       <HeroSection />
       <FeaturedYachts />
-      
-      <Footer />
-    </main>
-  )
+         <Features />
+         <Testimonials />
+      <Chatbot />
+      </main>
+)
 }
