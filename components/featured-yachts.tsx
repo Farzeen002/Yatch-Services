@@ -4,38 +4,47 @@ import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star } from "lucide-react"
+import { useLanguage } from "@/lib/language-context"
 
 export default function FeaturedYachts() {
+  const { t, language } = useLanguage()
+  
   const yachts = [
     {
       id: 1,
-      name: "Luxury Horizon",
-      type: "Superyacht",
-      price: "$5,000/day",
+      name: language === "en" ? "Luxury Horizon" : "الأفق الفاخر",
+      type: language === "en" ? "Superyacht" : "يخت فائق",
+      price: language === "en" ? "$5,000" : "٥٬٠٠٠ $",
       rating: 4.9,
       reviews: 128,
       image: "🛥️",
-      features: ["50m Length", "12 Guests", "Full Crew"],
+      features: language === "en" 
+        ? ["50m Length", "12 Guests", "Full Crew"]
+        : ["٥٠م طول", "١٢ ضيف", "طاقم كامل"],
     },
     {
       id: 2,
-      name: "Ocean Pearl",
-      type: "Motor Yacht",
-      price: "$3,500/day",
+      name: language === "en" ? "Ocean Pearl" : "لؤلؤة المحيط",
+      type: language === "en" ? "Motor Yacht" : "يخت بمحرك",
+      price: language === "en" ? "$3,500" : "٣٬٥٠٠ $",
       rating: 4.8,
       reviews: 95,
       image: "⛵",
-      features: ["35m Length", "8 Guests", "Captain Included"],
+      features: language === "en"
+        ? ["35m Length", "8 Guests", "Captain Included"]
+        : ["٣٥م طول", "٨ ضيوف", "قبطان مشمول"],
     },
     {
       id: 3,
-      name: "Sunset Dreams",
-      type: "Sailing Yacht",
-      price: "$2,800/day",
+      name: language === "en" ? "Sunset Dreams" : "أحلام الغروب",
+      type: language === "en" ? "Sailing Yacht" : "يخت شراعي",
+      price: language === "en" ? "$2,800" : "٢٬٨٠٠ $",
       rating: 4.7,
       reviews: 72,
       image: "🚤",
-      features: ["28m Length", "6 Guests", "Experienced Crew"],
+      features: language === "en"
+        ? ["28m Length", "6 Guests", "Experienced Crew"]
+        : ["٢٨م طول", "٦ ضيوف", "طاقم محترف"],
     },
   ]
 
@@ -49,9 +58,11 @@ export default function FeaturedYachts() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">Featured Yachts</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">
+            {t("yachts.title")}
+          </h2>
           <p className="text-lg text-muted-foreground text-balance">
-            Explore our handpicked collection of premium yachts available for your next adventure
+            {t("yachts.subtitle")}
           </p>
         </motion.div>
 
@@ -90,7 +101,7 @@ export default function FeaturedYachts() {
                       ))}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {yacht.rating} ({yacht.reviews} reviews)
+                      {yacht.rating} ({yacht.reviews} {t("yachts.reviews")})
                     </span>
                   </div>
 
@@ -103,9 +114,11 @@ export default function FeaturedYachts() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <span className="text-2xl font-bold text-primary">{yacht.price}</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {yacht.price}{t("yachts.perDay")}
+                    </span>
                     <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
-                      View Details
+                      {t("yachts.viewDetails")}
                     </button>
                   </div>
                 </div>

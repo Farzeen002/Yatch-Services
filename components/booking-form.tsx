@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import BookingCalendar from "./booking-calendar"
 
 interface BookingFormProps {
   onBooking: (booking: any) => void
@@ -12,30 +13,50 @@ interface BookingFormProps {
 export default function BookingForm({ onBooking }: BookingFormProps) {
   const [formData, setFormData] = useState({
     yachtName: "Luxury Catamaran",
-    date: "",
     guests: 4,
   })
+  const [selectedDates, setSelectedDates] = useState<{ start: Date; end: Date | null; isMultiDay: boolean } | null>(null)
 
   const yachts = [
-    { name: "Luxury Catamaran", price: 5000 },
-    { name: "Private Speedboat", price: 3000 },
-    { name: "Mega Yacht", price: 15000 },
-    { name: "Sailing Vessel", price: 4000 },
+    { name: "Luxury Catamaran", price: 5000, unavailableDates: [new Date(2024, 11, 15), new Date(2024, 11, 16)] },
+    { name: "Private Speedboat", price: 3000, unavailableDates: [new Date(2024, 11, 10), new Date(2024, 11, 11)] },
+    { name: "Mega Yacht", price: 15000, unavailableDates: [new Date(2024, 11, 20), new Date(2024, 11, 21)] },
+    { name: "Sailing Vessel", price: 4000, unavailableDates: [new Date(2024, 11, 12), new Date(2024, 11, 13)] },
   ]
 
   const selectedYacht = yachts.find((y) => y.name === formData.yachtName)
-  const totalPrice = selectedYacht ? selectedYacht.price * (formData.guests / 4) : 0
+  
+  const calculateTotalPrice = () => {
+    if (!selectedYacht || !selectedDates) return 0
+    
+    if (selectedDates.isMultiDay && selectedDates.end) {
+      const nights = Math.ceil((selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24))
+      return selectedYacht.price * nights * (formData.guests / 4)
+    }
+    
+    return selectedYacht.price * (formData.guests / 4)
+  }
+  
+  const totalPrice = calculateTotalPrice()
+
+  const handleDateSelect = (dates: { start: Date; end: Date | null; isMultiDay: boolean }) => {
+    setSelectedDates(dates)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.date) {
+    if (selectedDates) {
       onBooking({
         ...formData,
+        dates: selectedDates,
         totalPrice,
         timestamp: new Date().toISOString(),
       })
-      setFormData({ yachtName: "Luxury Catamaran", date: "", guests: 4 })
+      setFormData({ yachtName: "Luxury Catamaran", guests: 4 })
+      setSelectedDates(null)
       alert("Booking confirmed! Reference ID: #" + Math.random().toString(36).substr(2, 9).toUpperCase())
+    } else {
+      alert("Please select your dates first")
     }
   }
 
@@ -71,13 +92,10 @@ export default function BookingForm({ onBooking }: BookingFormProps) {
 
               {/* Date Selection */}
               <div>
-                <label className="block text-sm font-semibold text-primary mb-3">Booking Date</label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-                  required
+                <label className="block text-sm font-semibold text-primary mb-3">Select Your Dates</label>
+                <BookingCalendar
+                  onDateSelect={handleDateSelect}
+                  unavailableDates={selectedYacht?.unavailableDates || []}
                 />
               </div>
 
