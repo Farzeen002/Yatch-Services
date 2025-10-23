@@ -1,46 +1,42 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
+import { Anchor } from "lucide-react";
 
-interface NavbarProps {
-  currentPage: "home" | "admin"
-  setCurrentPage: (page: "home" | "admin") => void
-}
-
-export default function Navbar({ currentPage, setCurrentPage }: NavbarProps) {
+export default function Navbar() {
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-200"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/80 border-b border-border"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">⛵</span>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 gradient-ocean rounded-xl flex items-center justify-center shadow-luxury">
+            <Anchor className="w-6 h-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-primary">Marina</h1>
         </div>
 
-        <div className="flex gap-4">
-          <button
-            onClick={() => setCurrentPage("home")}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              currentPage === "home" ? "bg-primary text-white" : "text-primary hover:bg-primary/10"
-            }`}
-          >
+        <div className="hidden md:flex gap-8">
+          <a href="#home" className="text-foreground hover:text-primary transition-colors font-medium">
             Home
-          </button>
-          <button
-            onClick={() => setCurrentPage("admin")}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              currentPage === "admin" ? "bg-primary text-white" : "text-primary hover:bg-primary/10"
-            }`}
-          >
-            Admin
-          </button>
+          </a>
+          <a href="#yachts" className="text-foreground hover:text-primary transition-colors font-medium">
+            Yachts
+          </a>
+          <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium">
+            Features
+          </a>
+          <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium">
+            Reviews
+          </a>
         </div>
+
+        <button className="px-6 py-2 gradient-gold rounded-lg font-bold text-accent-foreground hover:shadow-glow transition-all transform hover:scale-105">
+          Book Now
+        </button>
       </div>
     </motion.nav>
-  )
+  );
 }
