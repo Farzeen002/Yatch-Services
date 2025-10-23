@@ -11,13 +11,13 @@
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(0.12 0.08 250); /* Deep navy */
+  --primary: oklch(21.664% 0.06136 252.816); /* Deep navy */
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.5 0.1 200); /* Ocean blue */
+  
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.92 0 0);
   --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(0.65 0.15 40); /* Gold accent */
+  --accent: oklch(85.677% 0.16593 110.588); /* Gold accent */
   --accent-foreground: oklch(0.15 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0 0);
@@ -30,14 +30,7 @@
   --chart-4: oklch(0.6 0.1 180);
   --chart-5: oklch(0.7 0.12 60);
   --radius: 0.5rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+ 
 }
 
 .dark {
@@ -111,14 +104,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+
 
 @keyframes fadeIn {
   from {
@@ -146,4 +132,184 @@
 
 .animate-slideUp {
   animation: slideUp 0.5s ease-in-out;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 210 100% 12%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 45 93% 58%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 12%;
+
+    --radius: 0.75rem;
+    
+    /* Custom yacht theme tokens */
+    --ocean-deep: 210 100% 12%;
+    --ocean-blue: 210 90% 45%;
+    --ocean-light: 210 70% 85%;
+    --gold: 45 93% 58%;
+    --gold-light: 45 90% 75%;
+    
+    /* Gradients */
+    --gradient-ocean: linear-gradient(135deg, hsl(210 100% 12%) 0%, hsl(210 90% 25%) 50%, hsl(210 100% 12%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 12%) 0%, hsl(220 85% 20%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45 93% 58%) 0%, hsl(38 92% 50%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 6px -1px hsl(210 100% 12% / 0.1);
+    --shadow-medium: 0 10px 25px -5px hsl(210 100% 12% / 0.15);
+    --shadow-luxury: 0 20px 40px -10px hsl(210 100% 12% / 0.2);
+    --shadow-glow: 0 0 30px hsl(45 93% 58% / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 25% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 215 25% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 25% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 70% 85%;
+    --primary-foreground: 215 25% 8%;
+
+    --secondary: 217 33% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 45 93% 58%;
+    --accent-foreground: 215 25% 8%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 210 70% 85%;
+    
+    --ocean-deep: 210 70% 85%;
+    --ocean-blue: 210 80% 60%;
+    --ocean-light: 210 60% 25%;
+    --gradient-ocean: linear-gradient(135deg, hsl(215 25% 8%) 0%, hsl(220 85% 15%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(215 25% 8%) 0%, hsl(220 85% 20%) 100%);
+    --shadow-luxury: 0 20px 40px -10px hsl(0 0% 0% / 0.4);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+}
+
+@layer utilities {
+  .gradient-ocean {
+    background: var(--gradient-ocean);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  
+  .shadow-luxury {
+    box-shadow: var(--shadow-luxury);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--accent) / 0.5); }
+    50% { box-shadow: 0 0 40px hsl(var(--accent) / 0.8); }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
 }
