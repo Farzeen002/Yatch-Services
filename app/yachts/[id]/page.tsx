@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Star, MapPin, Users, Anchor, Calendar, Clock, Wifi, Car, Utensils, Waves } from "lucide-react"
 import BookingCalendar from "@/components/booking-calendar"
-import YachtLocationMap from "@/components/yacht-location-map"
+// import FunctionalMap from "@/components/functional-map"
 import YachtImageGallery from "@/components/yacht-image-gallery"
 import InstantBookingCard from "@/components/instant-booking-card"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 
 interface YachtDetails {
-  id: number
+  id: string
   name: string
   type: string
   price: number
@@ -58,147 +58,62 @@ export default function YachtDetailPage() {
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end: Date | null; isMultiDay: boolean } | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Mock yacht data - in a real app, this would come from an API
-  const mockYachts: YachtDetails[] = [
-    {
-      id: 1,
-      name: "Luxury Horizon",
-      type: "Superyacht",
-      price: 5000,
-      rating: 4.9,
-      reviews: 128,
-      location: "Miami, FL",
-      guests: 12,
-      length: "50m",
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      description: "Experience the ultimate in luxury with the Luxury Horizon. This magnificent superyacht offers unparalleled comfort and style, featuring state-of-the-art amenities and breathtaking ocean views. Perfect for special occasions, corporate events, or simply indulging in the finest maritime experience.",
-      amenities: ["WiFi", "Air Conditioning", "Full Kitchen", "Bar", "Sun Deck", "Jacuzzi", "Water Sports Equipment"],
-      features: ["Helipad", "Cinema Room", "Gym", "Spa", "Wine Cellar", "Tender Garage"],
-      specifications: {
-        year: 2020,
-        beam: "12m",
-        draft: "3.5m",
-        fuel: "Diesel",
-        speed: "25 knots"
-      },
-      crew: {
-        captain: true,
-        crew: 6,
-        chef: true
-      },
-      availability: {
-        unavailableDates: [
-          new Date(2024, 11, 15),
-          new Date(2024, 11, 16),
-          new Date(2024, 11, 22),
-          new Date(2024, 11, 23),
-          new Date(2024, 11, 24)
-        ]
-      },
-      specialOffers: [
-        {
-          title: "Early Bird Special",
-          description: "Book 30+ days in advance and save 15%",
-          discount: 15,
-          validUntil: new Date(2025, 2, 31)
-        },
-        {
-          title: "Multi-Day Discount",
-          description: "Book for 3+ days and get 10% off",
-          discount: 10,
-          validUntil: new Date(2025, 11, 31)
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Ocean Pearl",
-      type: "Motor Yacht",
-      price: 3500,
-      rating: 4.8,
-      reviews: 95,
-      location: "Miami, FL",
-      guests: 8,
-      length: "35m",
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      description: "The Ocean Pearl combines elegance with performance, offering a perfect balance of luxury and adventure. With its sleek design and modern amenities, this motor yacht provides an exceptional cruising experience for intimate gatherings and special celebrations.",
-      amenities: ["WiFi", "Air Conditioning", "Kitchen", "Bar", "Sun Deck", "Water Sports"],
-      features: ["Tender", "Diving Equipment", "Fishing Gear", "Sound System"],
-      specifications: {
-        year: 2019,
-        beam: "8m",
-        draft: "2.5m",
-        fuel: "Diesel",
-        speed: "30 knots"
-      },
-      crew: {
-        captain: true,
-        crew: 3,
-        chef: false
-      },
-      availability: {
-        unavailableDates: [
-          new Date(2024, 11, 10),
-          new Date(2024, 11, 11),
-          new Date(2024, 11, 18),
-          new Date(2024, 11, 19)
-        ]
-      }
-    },
-    {
-      id: 3,
-      name: "Sunset Dreams",
-      type: "Sailing Yacht",
-      price: 2800,
-      rating: 4.7,
-      reviews: 72,
-      location: "Key West, FL",
-      guests: 6,
-      length: "28m",
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      description: "Sail into the sunset aboard the magnificent Sunset Dreams. This classic sailing yacht offers an authentic maritime experience with modern comforts. Perfect for romantic getaways and peaceful ocean adventures.",
-      amenities: ["WiFi", "Air Conditioning", "Galley", "Bar", "Deck", "Water Sports"],
-      features: ["Sailing Equipment", "Fishing Gear", "Snorkeling Gear", "Tender"],
-      specifications: {
-        year: 2018,
-        beam: "6m",
-        draft: "2m",
-        fuel: "Diesel",
-        speed: "12 knots"
-      },
-      crew: {
-        captain: true,
-        crew: 2,
-        chef: false
-      },
-      availability: {
-        unavailableDates: [
-          new Date(2024, 11, 12),
-          new Date(2024, 11, 13),
-          new Date(2024, 11, 20),
-          new Date(2024, 11, 21)
-        ]
-      }
-    }
-  ]
-
+  // Fetch yacht data from API
   useEffect(() => {
-    const yachtId = parseInt(params.id as string)
-    const foundYacht = mockYachts.find(y => y.id === yachtId)
-    setYacht(foundYacht || null)
-    setLoading(false)
+    const fetchYacht = async () => {
+      try {
+        const yachtId = params.id as string
+        const response = await fetch(`/api/yachts/${yachtId}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch yacht')
+        }
+
+        // Transform API data to match interface (expecting data.yacht)
+        const transformedYacht: YachtDetails = {
+          id: data.yacht.id,
+          name: data.yacht.name,
+          type: data.yacht.type,
+          price: data.yacht.price,
+          rating: data.yacht.rating,
+          reviews: data.yacht.reviews,
+          location: data.yacht.location,
+          guests: data.yacht.guests,
+          length: `${data.yacht.length}m`,
+          images: data.yacht.images && data.yacht.images.length > 0 ? data.yacht.images : [
+            "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+          ],
+          description: data.yacht.description || "A beautiful yacht for your next adventure.",
+          amenities: data.yacht.amenities || [],
+          features: data.yacht.amenities || [], // Using amenities as features for now
+          specifications: {
+            year: 2020, // Default values since not in schema
+            beam: "8m",
+            draft: "2m",
+            fuel: "Diesel",
+            speed: "20 knots"
+          },
+          crew: {
+            captain: true,
+            crew: Math.ceil(data.yacht.guests / 4), // Estimate crew based on guests
+            chef: data.yacht.guests > 8 // Chef for larger yachts
+          },
+          availability: {
+            unavailableDates: data.yacht.unavailable_dates ? data.yacht.unavailable_dates.map((date: string) => new Date(date)) : []
+          }
+        }
+        setYacht(transformedYacht)
+      } catch (error) {
+        console.error('Error fetching yacht:', error);
+        // No fallback data - show not found
+        setYacht(null)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchYacht();
   }, [params.id])
 
   const handleDateSelect = (dates: { start: Date; end: Date | null; isMultiDay: boolean }) => {
@@ -207,12 +122,12 @@ export default function YachtDetailPage() {
 
   const calculateTotalPrice = () => {
     if (!yacht || !selectedDates) return 0
-    
+
     if (selectedDates.isMultiDay && selectedDates.end) {
       const nights = Math.ceil((selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24))
       return yacht.price * nights
     }
-    
+
     return yacht.price
   }
 
@@ -221,7 +136,7 @@ export default function YachtDetailPage() {
       alert("Please select your dates first")
       return
     }
-    
+
     const totalPrice = calculateTotalPrice()
     const bookingDetails = {
       yacht: yacht?.name,
@@ -229,7 +144,7 @@ export default function YachtDetailPage() {
       totalPrice,
       bookingId: Math.random().toString(36).substr(2, 9).toUpperCase()
     }
-    
+
     // In a real app, this would redirect to a booking confirmation page
     alert(`Booking confirmed!\nYacht: ${yacht?.name}\nDates: ${selectedDates.start.toLocaleDateString()}${selectedDates.end ? ` - ${selectedDates.end.toLocaleDateString()}` : ''}\nTotal: $${totalPrice.toLocaleString()}\nBooking ID: ${bookingDetails.bookingId}`)
   }
@@ -275,13 +190,13 @@ export default function YachtDetailPage() {
         <div className="absolute top-1/2 -left-40 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl animate-pulse delay-1000" />
         <div className="absolute -bottom-40 right-1/3 w-64 h-64 bg-blue-300/20 rounded-full blur-3xl animate-pulse delay-2000" />
       </div>
-      
+
       <Navigation />
-      
+
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Back Button */}
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => router.back()}
           className="mb-6"
         >
@@ -310,7 +225,7 @@ export default function YachtDetailPage() {
                   </Badge>
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -458,11 +373,6 @@ export default function YachtDetailPage() {
               </Card>
             )}
 
-            {/* Location Map */}
-            <YachtLocationMap
-              location={yacht.location}
-              yachtName={yacht.name}
-            />
           </motion.div>
 
           {/* Instant Booking Card */}
@@ -484,6 +394,19 @@ export default function YachtDetailPage() {
               }}
             />
           </motion.div>
+
+          {/* Functional Map - Right side after payment card */}
+          {/* <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="lg:col-span-1"
+          >
+            <FunctionalMap
+              yachtLocation={yacht.location}
+              yachtName={yacht.name}
+            />
+          </motion.div> */}
         </div>
       </div>
 

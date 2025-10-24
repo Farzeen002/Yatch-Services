@@ -1,7 +1,7 @@
--- Yachts, Bookings, and Profiles table schemas for Supabase
--- Run this SQL in your Supabase SQL editor
+-- Complete Database Setup for Yacht Booking System
+-- Run this SQL in your Supabase SQL editor to set up all tables
 
--- Create profiles table
+-- 1. Create profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid(),
   full_name VARCHAR(255) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users (id) ON DELETE CASCADE
 );
 
--- Create yachts table
+-- 2. Create yachts table (if not exists)
 CREATE TABLE IF NOT EXISTS public.yachts (
   id UUID NOT NULL DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.yachts (
   CONSTRAINT yachts_pkey PRIMARY KEY (id)
 );
 
--- Create bookings table
+-- 3. Create bookings table (if not exists)
 CREATE TABLE IF NOT EXISTS public.bookings (
   id UUID NOT NULL DEFAULT gen_random_uuid(),
   yacht_id UUID NULL,
@@ -59,30 +59,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   CONSTRAINT bookings_yacht_id_fkey FOREIGN KEY (yacht_id) REFERENCES yachts (id) ON DELETE CASCADE
 );
 
--- Create enquiries table
-CREATE TABLE IF NOT EXISTS public.enquiries (
-  id UUID NOT NULL DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  phone VARCHAR(50),
-  yacht_id UUID REFERENCES yachts(id) ON DELETE SET NULL,
-  message TEXT NOT NULL,
-  status VARCHAR(50) DEFAULT 'new',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create feedback table
-CREATE TABLE IF NOT EXISTS public.feedback (
-  id UUID NOT NULL DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  yacht_id UUID REFERENCES yachts(id) ON DELETE CASCADE,
-  booking_id UUID REFERENCES bookings(id) ON DELETE CASCADE,
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  comment TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create indexes for better performance
+-- 4. Create indexes
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles USING btree (email);
 CREATE INDEX IF NOT EXISTS idx_profiles_phone ON public.profiles USING btree (phone);
 CREATE INDEX IF NOT EXISTS idx_yachts_type ON public.yachts USING btree (type);
@@ -91,10 +68,8 @@ CREATE INDEX IF NOT EXISTS idx_yachts_price ON public.yachts USING btree (price)
 CREATE INDEX IF NOT EXISTS idx_bookings_yacht_id ON public.bookings USING btree (yacht_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON public.bookings USING btree (user_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings USING btree (status);
-CREATE INDEX IF NOT EXISTS idx_enquiries_status ON public.enquiries USING btree (status);
-CREATE INDEX IF NOT EXISTS idx_feedback_yacht_id ON public.feedback USING btree (yacht_id);
 
--- Create updated_at trigger function
+-- 5. Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -103,7 +78,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
+-- 6. Create triggers
+CREATE TRIGGER update_profiles_updated_at 
+  BEFORE UPDATE ON public.profiles 
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_yachts_updated_at 
   BEFORE UPDATE ON public.yachts 
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -112,15 +91,10 @@ CREATE TRIGGER update_bookings_updated_at
   BEFORE UPDATE ON public.bookings 
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_profiles_updated_at 
-  BEFORE UPDATE ON public.profiles 
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Enable Row Level Security (RLS)
+-- 7. Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies for profiles
--- Users can only see and modify their own profile
+-- 8. Create RLS policies for profiles
 CREATE POLICY "Users can view own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
@@ -130,16 +104,7 @@ CREATE POLICY "Users can insert own profile" ON public.profiles
 CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
--- Admins can view all profiles
-CREATE POLICY "Admins can view all profiles" ON public.profiles
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.users 
-      WHERE users.id = auth.uid() 
-      AND users.role_type = 'admin'
-    )
-  );
--- Insert sample yachts data
+-- 9. Insert sample yachts data (if not exists)
 INSERT INTO yachts (name, type, price, rating, reviews, location, guests, length, amenities, description) VALUES
 (
   'Ocean Dream',
@@ -200,5 +165,6 @@ INSERT INTO yachts (name, type, price, rating, reviews, location, guests, length
   72.3,
   ARRAY['WiFi', 'Air Conditioning', 'Chef Service', 'Wine Cellar', 'Kayaks', 'Snorkeling Equipment'],
   'Premium sailing yacht combining traditional elegance with modern comfort. Features spacious cabins and professional crew.'
-);
+)
+ON CONFLICT (id) DO NOTHING;
 

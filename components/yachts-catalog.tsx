@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
@@ -17,6 +17,7 @@ import { checkYachtAvailability, type YachtAvailability } from "@/lib/availabili
 export default function YachtsCatalog() {
   const [selectedType, setSelectedType] = useState("all")
   const [showFilters, setShowFilters] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end: Date | null; isMultiDay: boolean } | null>(null)
   const [filters, setFilters] = useState({
     priceRange: [1000, 10000],
@@ -24,125 +25,36 @@ export default function YachtsCatalog() {
     length: [20, 80],
     amenities: [] as string[]
   })
+  const [yachts, setYachts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const yachts = [
-    {
-      id: 1,
-      name: "Luxury Horizon",
-      type: "Superyacht",
-      price: 5000,
-      rating: 4.9,
-      reviews: 128,
-      location: "Miami, FL",
-      guests: 12,
-      length: 50,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Jacuzzi", "Helipad", "Cinema", "Gym", "Spa"],
-      unavailableDates: [new Date(2024, 11, 15), new Date(2024, 11, 16), new Date(2024, 11, 22)],
-      specialOffers: [
-        {
-          title: "Early Bird",
-          discount: 15,
-          validUntil: new Date(2025, 2, 31)
+  // Fetch yachts from database
+  useEffect(() => {
+    const fetchYachts = async () => {
+      try {
+        const response = await fetch('/api/yachts')
+        const data = await response.json()
+
+        if (!response.ok) {
+          console.error('API returned error:', data)
+          throw new Error(data.error || 'Failed to fetch yachts')
         }
-      ]
-    },
-    {
-      id: 2,
-      name: "Ocean Pearl",
-      type: "Motor Yacht",
-      price: 3500,
-      rating: 4.8,
-      reviews: 95,
-      location: "Miami, FL",
-      guests: 8,
-      length: 35,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Bar", "Water Sports", "Fishing Gear"],
-      unavailableDates: [new Date(2024, 11, 10), new Date(2024, 11, 11), new Date(2024, 11, 18)]
-    },
-    {
-      id: 3,
-      name: "Sunset Dreams",
-      type: "Sailing Yacht",
-      price: 2800,
-      rating: 4.7,
-      reviews: 72,
-      location: "Key West, FL",
-      guests: 6,
-      length: 28,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Sailing Equipment", "Snorkeling", "Fishing"],
-      unavailableDates: [new Date(2024, 11, 12), new Date(2024, 11, 13), new Date(2024, 11, 20)]
-    },
-    {
-      id: 4,
-      name: "Azure Escape",
-      type: "Motor Yacht",
-      price: 4200,
-      rating: 4.9,
-      reviews: 110,
-      location: "Miami, FL",
-      guests: 10,
-      length: 42,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Jacuzzi", "Bar", "Water Sports", "Diving"],
-      unavailableDates: [new Date(2024, 11, 14), new Date(2024, 11, 15), new Date(2024, 11, 25)]
-    },
-    {
-      id: 5,
-      name: "Serenity",
-      type: "Sailing Yacht",
-      price: 2200,
-      rating: 4.6,
-      reviews: 58,
-      location: "Key Largo, FL",
-      guests: 4,
-      length: 22,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Sailing Equipment", "Fishing"],
-      unavailableDates: [new Date(2024, 11, 8), new Date(2024, 11, 9), new Date(2024, 11, 17)]
-    },
-    {
-      id: 6,
-      name: "Prestige",
-      type: "Superyacht",
-      price: 6500,
-      rating: 5.0,
-      reviews: 89,
-      location: "Miami, FL",
-      guests: 16,
-      length: 65,
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-      ],
-      amenities: ["WiFi", "Jacuzzi", "Helipad", "Cinema", "Gym", "Spa", "Wine Cellar"],
-      unavailableDates: [new Date(2024, 11, 19), new Date(2024, 11, 20), new Date(2024, 11, 21)]
-    },
-  ]
+
+        // Support both shape { yachts: [...] } or direct array/object
+        const yachtsData = data.yachts ?? data ?? []
+        setYachts(yachtsData)
+      } catch (error) {
+        console.error('Error fetching yachts:', error);
+        // No fallback data - show empty state
+        setYachts([])
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchYachts();
+  }, []);
 
   const yachtAvailabilities: YachtAvailability[] = yachts.map(yacht => ({
     yachtId: yacht.id,
@@ -211,14 +123,26 @@ export default function YachtsCatalog() {
         <div className="mb-8 space-y-6">
           {/* Date Selection */}
           <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Select Your Dates</h3>
             </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="flex items-center gap-2"
+              >
+                <Calendar className="h-4 w-4" />
+                {showCalendar ? "Hide Calendar" : "Show Calendar"}
+              </Button>
+            </div>
+            {showCalendar && (
             <BookingCalendar
               onDateSelect={handleDateSelect}
               yachtAvailabilities={yachtAvailabilities}
             />
+            )}
           </Card>
 
           {/* Filter Toggle */}
@@ -296,7 +220,7 @@ export default function YachtsCatalog() {
                       type="number"
                       min="1"
                       max="20"
-                      value={filters.guests}
+                      value={String(filters.guests)}
                       onChange={(e) => setFilters({ ...filters, guests: parseInt(e.target.value) || 1 })}
                       className="w-full"
                     />
@@ -475,3 +399,4 @@ export default function YachtsCatalog() {
     </section>
   )
 }
+// ...existing code...
