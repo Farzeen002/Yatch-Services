@@ -56,6 +56,28 @@ export default function BookingsManagement() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Update Booking Status
+  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: newStatus })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+
+      setBookings((prev) =>
+        prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
+      );
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      alert("Failed to update booking status");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch bookings from Supabase
   const fetchBookings = async () => {
     setLoading(true);
@@ -216,6 +238,28 @@ export default function BookingsManagement() {
             <h1 className="text-4xl font-bold flex items-center gap-2 mb-4"><Ship />Bookings</h1>
             <BookingStats bookings={bookings} />
           </motion.div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6">
+            {/* Search box */}
+            <input
+              type="text"
+              placeholder="Search bookings..."
+              className="border rounded-md px-3 py-2 w-full md:w-1/2"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
+            {/* Status dropdown */}
+            <select
+              className="border rounded-md px-3 py-2 w-full md:w-1/4"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
 
           <div className={viewMode === "grid" ? "grid md:grid-cols-2 gap-6 mt-8" : "space-y-4 mt-8"}>
             {filteredAndSortedBookings.map((booking, i) => (
@@ -234,15 +278,40 @@ export default function BookingsManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" />{booking.startDate}</div>
-                      <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" />{calculateDays(booking.startDate, booking.endDate)} days</div>
+                      <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" />Start Date : {booking.startDate}</div>
+                      <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" />End Date: {booking.endDate}</div>
                       <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" />{booking.location}</div>
                       <div className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" />{booking.guests} guests</div>
                     </div>
                     <div className="flex gap-2 pt-4 mt-4 border-t">
-                      <Button size="sm" className="flex-1" onClick={() => handleViewDetails(booking)}><Eye className="h-4 w-4 mr-2" />View</Button>
-                      <Button size="sm" variant="outline"><Edit className="h-4 w-4" /></Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-blue-600 hover:bg-green-700 text-white"
+                        disabled={booking.status === "confirmed"}
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to CONFIRM booking for ${booking.yachtName}?`)) {
+                            updateBookingStatus(booking.id, "confirmed");
+                          }
+                        }}
+                      >
+                        Confirm
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+                        disabled={booking.status === "cancelled"}
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to CANCEL booking for ${booking.yachtName}?`)) {
+                            updateBookingStatus(booking.id, "cancelled");
+                          }
+                        }}
+                      >
+                        Cancel
+                      </Button>
                     </div>
+
                   </div>
                 </Card>
               </motion.div>
