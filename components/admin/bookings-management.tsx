@@ -8,19 +8,23 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Users, DollarSign, CheckCircle, XCircle, Clock, Eye } from "lucide-react"
-import { createClient } from "@/utils/supabase/client"
+// Removed direct Supabase client - using API routes instead
 
 interface Booking {
   id: string
+  yacht_id: string
   yacht_name: string
   start_date: string
   end_date: string
   guests: number
   total_price: number
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'cancelled' | 'approved' | 'checked'
+  payment_id?: string
+  payment_status?: 'pending' | 'completed' | 'failed'
   user_name?: string
   user_email?: string
   created_at: string
+  updated_at: string
 }
 
 interface BookingsManagementProps {
@@ -31,8 +35,7 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  
-  const supabase = createClient()
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
 
   useEffect(() => {
     fetchBookings()
@@ -41,42 +44,21 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
   const fetchBookings = async () => {
     try {
       setIsLoading(true)
-      let query = supabase
-        .from('bookings')
-        .select(`
-          *,
-          yachts(name),
-          profiles(username, email)
-        `)
-        .order('created_at', { ascending: false })
-
+      const url = new URL('/api/bookings', window.location.origin)
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter)
+        url.searchParams.set('status', statusFilter)
       }
 
-      const { data, error } = await query
+      const response = await fetch(url.toString())
+      const data = await response.json()
 
-      if (error) {
-        console.error('Error fetching bookings:', error)
-        return
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch bookings')
       }
 
-      const formattedBookings = data?.map(booking => ({
-        id: booking.id,
-        yacht_name: booking.yachts?.name || 'Unknown Yacht',
-        start_date: booking.start_date,
-        end_date: booking.end_date,
-        guests: booking.guests,
-        total_price: booking.total_price,
-        status: booking.status,
-        user_name: booking.profiles?.username || 'Unknown User',
-        user_email: booking.profiles?.email || 'No email',
-        created_at: booking.created_at
-      })) || []
-
-      setBookings(formattedBookings)
+      setBookings(data.bookings || [])
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error fetching bookings:', error)
     } finally {
       setIsLoading(false)
     }
@@ -84,17 +66,22 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: newStatus })
-        .eq('id', bookingId)
+      setUpdatingStatus(bookingId)
+      
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
 
-      if (error) {
-        console.error('Error updating booking:', error)
-        alert('Error updating booking status')
-        return
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update booking status')
       }
 
+      // Update local state
       setBookings(prev => 
         prev.map(booking => 
           booking.id === bookingId 
@@ -102,10 +89,13 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
             : booking
         )
       )
+      
       onStatusUpdate?.()
     } catch (error) {
-      console.error('Error:', error)
-      alert('Error updating booking status')
+      console.error('Error updating booking:', error)
+      alert(error instanceof Error ? error.message : 'Error updating booking status')
+    } finally {
+      setUpdatingStatus(null)
     }
   }
 
@@ -113,6 +103,8 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
     const statusConfig = {
       pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       confirmed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      approved: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+      checked: { color: 'bg-purple-100 text-purple-800', icon: Eye },
       cancelled: { color: 'bg-red-100 text-red-800', icon: XCircle }
     }
 
@@ -172,6 +164,8 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
                   <SelectItem value="all">All Bookings</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="checked">Checked</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
@@ -260,6 +254,30 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
                                 size="sm"
                                 onClick={() => updateBookingStatus(booking.id, 'confirmed')}
                                 className="bg-green-600 hover:bg-green-700 text-white"
+                                disabled={updatingStatus === booking.id}
+                              >
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Confirm
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                                className="border-red-300 text-red-700 hover:bg-red-50"
+                                disabled={updatingStatus === booking.id}
+                              >
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {booking.status === 'confirmed' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => updateBookingStatus(booking.id, 'approved')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={updatingStatus === booking.id}
                               >
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Approve
@@ -269,20 +287,30 @@ export default function BookingsManagement({ onStatusUpdate }: BookingsManagemen
                                 variant="outline"
                                 onClick={() => updateBookingStatus(booking.id, 'cancelled')}
                                 className="border-red-300 text-red-700 hover:bg-red-50"
+                                disabled={updatingStatus === booking.id}
                               >
                                 <XCircle className="h-3 w-3 mr-1" />
-                                Reject
+                                Cancel
                               </Button>
                             </>
                           )}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
+                          {booking.status === 'approved' && (
+                            <Button
+                              size="sm"
+                              onClick={() => updateBookingStatus(booking.id, 'checked')}
+                              className="bg-purple-600 hover:bg-purple-700 text-white"
+                              disabled={updatingStatus === booking.id}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Mark Checked
+                            </Button>
+                          )}
+                          {booking.status === 'checked' && (
+                            <span className="text-sm text-gray-500 italic">Completed</span>
+                          )}
+                          {booking.status === 'cancelled' && (
+                            <span className="text-sm text-red-500 italic">Cancelled</span>
+                          )}
                         </div>
                       </TableCell>
                     </motion.tr>
