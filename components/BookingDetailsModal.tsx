@@ -57,7 +57,7 @@ export default function BookingDetailsModal({ booking, open, onClose }: BookingD
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="mx-auto w-full max-w-[200rem] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
