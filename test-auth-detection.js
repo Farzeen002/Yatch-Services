@@ -3,7 +3,7 @@ async function testAuthDetection() {
   console.log('Testing authentication detection...')
   
   try {
-    const response = await fetch('http://localhost:3000/api/chat', {
+    const response = await fetch('http://localhost:3000/api/chat-bot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

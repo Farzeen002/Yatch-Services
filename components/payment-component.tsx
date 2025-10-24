@@ -59,7 +59,7 @@ export default function PaymentComponent({
       }
 
       // Create order
-      const orderResponse = await fetch('/api/payments/create-order', {
+      const orderResponse = await fetch('/api/payments-bot/create-order-bot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,7 +87,7 @@ export default function PaymentComponent({
         handler: async (response: any) => {
           try {
             // Verify payment
-            const verifyResponse = await fetch('/api/payments/verify', {
+            const verifyResponse = await fetch('/api/payments-bot/verify-bot', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

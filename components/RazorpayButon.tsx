@@ -57,7 +57,7 @@ export default function RazorpayButton({
         handler: async function (response: any) {
           try {
             // Verify payment
-            const verifyResponse = await fetch('/api/payments/verify-payment', {
+            const verifyResponse = await fetch('/api/payments-bot/verify-payment-bot', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
