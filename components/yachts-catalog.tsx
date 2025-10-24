@@ -58,8 +58,8 @@ export default function YachtsCatalog() {
 
   const yachtAvailabilities: YachtAvailability[] = yachts.map(yacht => ({
     yachtId: yacht.id,
-    unavailableDates: yacht.unavailableDates,
-    maintenanceDates: []
+    unavailableDates: Array.isArray(yacht.unavailableDates) ? yacht.unavailableDates : [],
+    maintenanceDates: Array.isArray(yacht.maintenanceDates) ? yacht.maintenanceDates : []
   }))
 
   const types = ["all", "Superyacht", "Motor Yacht", "Sailing Yacht"]
@@ -95,7 +95,7 @@ export default function YachtsCatalog() {
 
     // Amenities filter
     if (filters.amenities.length > 0) {
-      const hasAllAmenities = filters.amenities.every(amenity => 
+      const hasAllAmenities = filters.amenities.every(amenity =>
         yacht.amenities.includes(amenity)
       )
       if (!hasAllAmenities) return false
@@ -125,9 +125,9 @@ export default function YachtsCatalog() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Select Your Dates</h3>
-            </div>
+                <Calendar className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Select Your Dates</h3>
+              </div>
               <Button
                 variant="outline"
                 onClick={() => setShowCalendar(!showCalendar)}
@@ -138,10 +138,10 @@ export default function YachtsCatalog() {
               </Button>
             </div>
             {showCalendar && (
-            <BookingCalendar
-              onDateSelect={handleDateSelect}
-              yachtAvailabilities={yachtAvailabilities}
-            />
+              <BookingCalendar
+                onDateSelect={handleDateSelect}
+                yachtAvailabilities={yachtAvailabilities}
+              />
             )}
           </Card>
 
@@ -159,7 +159,7 @@ export default function YachtsCatalog() {
                   <Badge variant="secondary" className="ml-2">Active</Badge>
                 )}
               </Button>
-              
+
               {selectedDates && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
@@ -178,7 +178,7 @@ export default function YachtsCatalog() {
                 </div>
               )}
             </div>
-            
+
             <div className="text-sm text-muted-foreground">
               {filtered.length} yacht{filtered.length !== 1 ? 's' : ''} available
             </div>
@@ -280,11 +280,10 @@ export default function YachtsCatalog() {
             <button
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                selectedType === type
+              className={`px-6 py-2 rounded-lg font-medium transition-all ${selectedType === type
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+                }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
@@ -299,12 +298,12 @@ export default function YachtsCatalog() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 transition: { duration: 0.2 }
               }}
             >
-              <Card 
+              <Card
                 className="overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 h-full flex flex-col cursor-pointer group"
                 onClick={() => router.push(`/yachts/${yacht.id}`)}
               >
@@ -324,10 +323,10 @@ export default function YachtsCatalog() {
                       </Badge>
                     )}
                   </div>
-                  
+
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   {/* Quick View Button */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Button
@@ -380,7 +379,7 @@ export default function YachtsCatalog() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                     <span className="text-xl font-bold text-primary">${yacht.price.toLocaleString()}/day</span>
-                    <button 
+                    <button
                       className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
                       onClick={(e) => {
                         e.stopPropagation()
@@ -399,4 +398,3 @@ export default function YachtsCatalog() {
     </section>
   )
 }
-// ...existing code...
