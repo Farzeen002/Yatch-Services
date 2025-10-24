@@ -18,6 +18,8 @@ export default function Navigation() {
     { href: "/", label: "Home" },
     { href: "/yachts", label: "Yachts" },
     { href: "/bookings", label: "Bookings" },
+    { href: "/invoices", label: "invoices" },
+    { href: "/Staff", label: "staff" },
   ]
 
   // Fetch logged-in user info
