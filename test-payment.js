@@ -3,7 +3,7 @@ async function testPaymentGeneration() {
   console.log('Testing payment generation...')
   
   try {
-    const response = await fetch('http://localhost:3000/api/payments/create-razorpay-order', {
+    const response = await fetch('http://localhost:3000/api/payments-bot/create-razorpay-order-bot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

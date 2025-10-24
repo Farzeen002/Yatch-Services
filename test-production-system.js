@@ -39,7 +39,7 @@ async function testProductionSystem() {
     console.log(`\n--- ${testCase.name} ---`)
     
     try {
-      const response = await fetch('http://localhost:3000/api/chat', {
+      const response = await fetch('http://localhost:3000/api/chat-bot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -91,7 +91,7 @@ async function testRateLimiting() {
   const requests = []
   for (let i = 0; i < 15; i++) {
     requests.push(
-      fetch('http://localhost:3000/api/chat', {
+      fetch('http://localhost:3000/api/chat-bot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

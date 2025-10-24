@@ -89,18 +89,16 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
             }
             addMessage(processingMessage)
 
-            // Verify payment on backend
-            const verifyResponse = await fetch('/api/payments/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                bookingId: paymentData.bookingId,
-              })
-            })
-
+           const verifyResponse = await fetch('/api/payments-bot/verify-bot', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    razorpay_order_id: response.razorpay_order_id,
+    razorpay_payment_id: response.razorpay_payment_id,
+    razorpay_signature: response.razorpay_signature,
+    bookingId: paymentData.bookingId,
+  })
+})
             const verifyData = await verifyResponse.json()
 
             if (verifyResponse.ok && verifyData.success) {
@@ -201,7 +199,7 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chat-bot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, sessionId }),

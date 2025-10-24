@@ -14,7 +14,7 @@ async function testConversation() {
     console.log(`\n--- Testing: "${message}" ---`)
     
     try {
-      const response = await fetch('http://localhost:3000/api/chat', {
+      const response = await fetch('http://localhost:3000/-bot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, sessionId })

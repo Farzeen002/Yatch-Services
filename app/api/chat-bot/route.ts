@@ -609,6 +609,8 @@ Respond as Marina, maintaining conversation context and providing helpful yacht 
 
 // REPLACE LINES ~480-550 (the payment processing section) WITH THIS:
 
+// ... (keep all imports and code above line ~480)
+
 // 12. PROCESS PAYMENT FOR AUTHENTICATED USERS
 if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext.selectedYacht || updatedContext.needPaymentLink)) {
   try {
@@ -631,8 +633,8 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
       startDate: new Date().toISOString().split('T')[0] // Today's date
     }
     
-    // Create Razorpay order
-    const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/payments/create-razorpay-order`, {
+    // Create Razorpay order (UPDATED PATH)
+    const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/payments-bot/create-razorpay-order-bot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -649,7 +651,7 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
     if (paymentResponse.ok) {
       const paymentData = await paymentResponse.json()
       
-      // UPDATED: Return payment data for button instead of link
+      // Return payment data for button
       const enhancedResponse = `${text}\n\n🚢 **BOOKING DETAILS** 🚢\n\n` +
         `**Yacht:** ${bookingDetails.yachtName}\n` +
         `**Duration:** ${bookingDetails.duration} days\n` +
@@ -659,12 +661,12 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
         `💳 **Click the payment button below to complete your booking**\n` +
         `Order ID: ${paymentData.order.id}`
       
-      // UPDATED: Return payment button data
+      // CRITICAL: Return ONLY ONCE with payment button data
       return Response.json({ 
         response: enhancedResponse, 
         type: "ai",
-        showPaymentButton: true, // NEW: Flag to show button
-        paymentData: { // NEW: Payment button data
+        showPaymentButton: true,
+        paymentData: {
           orderId: paymentData.order.id,
           amount: paymentData.order.amount,
           currency: paymentData.order.currency,
@@ -684,6 +686,11 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
     return Response.json({ response: errorResponse, type: "ai" })
   }
 }
+
+// IMPORTANT: Only reached if payment processing was NOT triggered
+return Response.json({ response: text, type: "ai" })
+
+// ... (rest of the catch blocks below)
 
 return Response.json({ response: text, type: "ai" })
 
