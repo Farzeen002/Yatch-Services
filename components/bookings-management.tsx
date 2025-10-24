@@ -94,7 +94,7 @@ export default function BookingsManagement() {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="flex flex-col md:flex-row">
                     {/* Yacht Image */}
-                    <div className="bg-gradient-to-br from-primary to-blue-900 p-8 flex items-center justify-center w-full md:w-48 h-48">
+                    <div className="bg-linear-to-br from-primary to-blue-900 p-8 flex items-center justify-center w-full md:w-48 h-48">
                       <span className="text-6xl">{booking.image}</span>
                     </div>
 
