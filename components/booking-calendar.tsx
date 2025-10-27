@@ -32,9 +32,9 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
     }
 
     setSelectedDates(range)
-    
+
     const isMultiDay = bookingType === "multi" && range.to && range.from.getTime() !== range.to.getTime()
-    
+
     // Check availability if yachtId is provided
     if (yachtId && yachtAvailabilities.length > 0) {
       const availability = checkYachtAvailability(
@@ -43,9 +43,9 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
         isMultiDay ? range.to || null : null,
         yachtAvailabilities
       )
-      
+
       setAvailabilityCheck(availability)
-      
+
       if (!availability.isAvailable) {
         const alternatives = getAlternativeDates(
           yachtId,
@@ -58,32 +58,32 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
         setAlternativeDates([])
       }
     }
-    
+
     onDateSelect({
       start: range.from,
-      end: isMultiDay ? range.to || null : null,
+      end: isMultiDay ? range.to || null : range.from,
       isMultiDay: !!isMultiDay
     })
   }
 
   const isDateUnavailable = (date: Date) => {
-    return unavailableDates.some(unavailableDate => 
+    return unavailableDates.some(unavailableDate =>
       unavailableDate.toDateString() === date.toDateString()
     )
   }
 
   const getDateRangeText = () => {
     if (!selectedDates?.from) return "Select dates"
-    
+
     if (bookingType === "single") {
       return selectedDates.from.toLocaleDateString()
     }
-    
+
     if (selectedDates.to) {
       const nights = Math.ceil((selectedDates.to.getTime() - selectedDates.from.getTime()) / (1000 * 60 * 60 * 24))
       return `${selectedDates.from.toLocaleDateString()} - ${selectedDates.to.toLocaleDateString()} (${nights} nights)`
     }
-    
+
     return selectedDates.from.toLocaleDateString()
   }
 
@@ -144,7 +144,7 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
                 const today = new Date()
                 today.setHours(0, 0, 0, 0)
                 if (date < today) return true
-                
+
                 // Disable unavailable dates
                 return isDateUnavailable(date)
               }}
@@ -168,7 +168,7 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
                 const today = new Date()
                 today.setHours(0, 0, 0, 0)
                 if (date < today) return true
-                
+
                 // Disable unavailable dates
                 return isDateUnavailable(date)
               }}
@@ -205,7 +205,7 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const newRange = bookingType === "multi" 
+                    const newRange = bookingType === "multi"
                       ? { from: date, to: new Date(date.getTime() + 24 * 60 * 60 * 1000) }
                       : { from: date, to: undefined }
                     handleDateSelect(newRange)
