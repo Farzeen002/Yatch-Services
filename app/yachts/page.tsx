@@ -1,7 +1,6 @@
 "use client"
 import Navigation from "@/components/navigation"
 import YachtsCatalog from "@/components/yachts-catalog"
-import Chatbot from "@/components/chatbot"
 import Footer from "@/components/footer"
 
 export default function YachtsPage() {
@@ -16,7 +15,6 @@ export default function YachtsPage() {
       
       <Navigation />
       <YachtsCatalog />
-      <Chatbot />
       <Footer />
     </main>
   )

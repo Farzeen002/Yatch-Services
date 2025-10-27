@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient } from "@/utils/supabase/server"
+import { checkYachtAvailability, createBooking, calculateBookingPrice } from "@/lib/booking-utils"
 
+<<<<<<< HEAD
 // ✅ GET /api/bookings - Fetch bookings (with filters)
 export async function GET(request: NextRequest) {
   try {
@@ -127,11 +128,38 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ Check yacht availability and capacity
+=======
+export async function POST(request: Request) {
+  try {
+    const { yachtId, startDate, endDate, guests } = await request.json()
+    
+    // Validate input
+    if (!yachtId || !startDate || !endDate || !guests) {
+      return Response.json(
+        { success: false, error: 'Missing required booking information' },
+        { status: 400 }
+      )
+    }
+    
+    // Check if user is authenticated (with cookies)
+    const supabase = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return Response.json(
+        { success: false, error: 'Please log in to make a booking', requiresAuth: true },
+        { status: 401 }
+      )
+    }
+    
+    // Get yacht details for pricing
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
     const { data: yacht, error: yachtError } = await supabase
       .from('yachts')
-      .select('unavailable_dates, guests')
-      .eq('id', body.yacht_id)
+      .select('*')
+      .eq('id', yachtId)
       .single()
+<<<<<<< HEAD
 
     if (yachtError || !yacht) {
       return NextResponse.json({ error: 'Yacht not found' }, { status: 404 })
@@ -404,3 +432,109 @@ export async function POST(request: NextRequest) {
 //     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 //   }
 // }
+=======
+    
+    if (yachtError || !yacht) {
+      return Response.json(
+        { success: false, error: 'Yacht not found' },
+        { status: 404 }
+      )
+    }
+    
+    // Calculate pricing
+    const pricing = calculateBookingPrice(yacht.price, startDate, endDate, guests)
+    
+    // Check availability
+    const availability = await checkYachtAvailability(yachtId, startDate, endDate, guests)
+    
+    if (!availability.available) {
+      return Response.json(
+        { success: false, error: availability.error },
+        { status: 400 }
+      )
+    }
+    
+    // Create booking
+    const bookingResult = await createBooking({
+      yachtId,
+      userId: user.id,
+      startDate,
+      endDate,
+      guests,
+      totalPrice: pricing.totalPrice
+    })
+    
+    if (!bookingResult.success) {
+      return Response.json(
+        { success: false, error: bookingResult.error },
+        { status: 400 }
+      )
+    }
+    
+    return Response.json({
+      success: true,
+      booking: bookingResult.booking,
+      pricing,
+      availability: {
+        totalBookedGuests: availability.totalBookedGuests,
+        remainingCapacity: availability.remainingCapacity
+      }
+    })
+    
+  } catch (error) {
+    console.error('Booking API error:', error)
+    return Response.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return Response.json(
+        { success: false, error: 'Please log in to view bookings' },
+        { status: 401 }
+      )
+    }
+    
+    // Get user bookings
+    const { data: bookings, error } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        yachts(name, type, location, images),
+        payments(status, amount, created_at)
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching bookings:', error)
+      return Response.json(
+        { success: false, error: 'Failed to fetch bookings' },
+        { status: 500 }
+      )
+    }
+    
+    return Response.json({
+      success: true,
+      bookings: bookings || []
+    })
+    
+  } catch (error) {
+    console.error('Get bookings API error:', error)
+    return Response.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+    }
+}
+
+
+
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f

@@ -740,6 +740,7 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
     setIsProcessing(true)
 
     try {
+<<<<<<< HEAD
       let adjustedEndDate = selectedDates.end
       if (!selectedDates.end || selectedDates.start.getTime() === selectedDates.end.getTime()) {
         adjustedEndDate = new Date(selectedDates.start)
@@ -761,6 +762,22 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
           email: userProfile.email,
           phone: userProfile.phone
         }
+=======
+      // ✅ FIX 1: Handle null adjustedEndDate properly
+      let adjustedEndDate: Date
+      if (!selectedDates.end || selectedDates.start.getTime() === selectedDates.end.getTime()) {
+        adjustedEndDate = new Date(selectedDates.start)
+        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1)
+      } else {
+        adjustedEndDate = selectedDates.end
+      }
+
+      const bookingData = {
+        yachtId: yacht.id,
+        startDate: selectedDates.start.toISOString().split("T")[0],
+        endDate: adjustedEndDate.toISOString().split("T")[0],
+        guests
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
       }
 
       const token = await getAuthToken()
@@ -788,11 +805,19 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
         endDate: adjustedEndDate,
         guests,
         bookingId: booking.id,
+<<<<<<< HEAD
         bookingReference: bookingData.booking_reference,
         paymentId: paymentResult.paymentId
       })
       setShowConfirmation(true)
       setTimeout(() => router.push("/bookings"), 3000)
+=======
+        bookingReference: booking.id.substring(0, 8).toUpperCase(),
+        paymentId: paymentResult.paymentId
+      })
+      setShowConfirmation(true)
+      setTimeout(() => router.push("/user/bookings"), 3000)
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
     } catch (error: any) {
       console.error("Booking error:", error)
       toast({
@@ -863,10 +888,14 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
           {/* Date Selection */}
           <div className="mb-6">
             <Label className="text-sm font-semibold text-gray-700 mb-3 block">Choose Your Dates</Label>
+<<<<<<< HEAD
+=======
+            {/* ✅ FIX 2: Convert yacht.id to number for yachtId prop */}
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
             <BookingCalendar
               onDateSelect={setSelectedDates}
               unavailableDates={yacht.unavailableDates}
-              yachtId={yacht.id}
+              yachtId={parseInt(yacht.id)}
             />
           </div>
 
@@ -923,7 +952,7 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
           <Button
             onClick={handleInstantBook}
             disabled={!selectedDates || isProcessing}
-            className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-linear-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             size="lg"
           >
             {isProcessing ? (
@@ -961,7 +990,7 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200"
+            className="mt-4 p-3 bg-linear-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200"
           >
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="w-4 h-4 text-orange-600" />
@@ -972,11 +1001,22 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
         </Card>
       </motion.div>
 
+<<<<<<< HEAD
       <BookingConfirmationModal
         isOpen={showConfirmation}
         onClose={() => setShowConfirmation(false)}
         bookingDetails={bookingDetails}
       />
+=======
+      {/* ✅ FIX 3: Add null check before passing bookingDetails */}
+      {bookingDetails && (
+        <BookingConfirmationModal
+          isOpen={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          bookingDetails={bookingDetails}
+        />
+      )}
+>>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
 
       <UserProfileModal
         isOpen={showProfileModal}

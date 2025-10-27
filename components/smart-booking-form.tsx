@@ -8,14 +8,15 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Loader2, AlertCircle, CheckCircle, User, LogIn } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import PaymentComponent from "./payment-component"
 import { toast } from "sonner"
+import { createClient } from "@/utils/supabase/client"
 
 interface Yacht {
-  id: number
+  id: string
   name: string
   type: string
   price: number
@@ -29,29 +30,55 @@ interface BookingFormProps {
   onBookingComplete?: (bookingId: string) => void
 }
 
-export default function BookingForm({ yacht, onBookingComplete }: BookingFormProps) {
-  const [step, setStep] = useState<'details' | 'payment' | 'confirmation'>('details')
+interface User {
+  id: string
+  email: string
+  full_name?: string
+}
+
+export default function SmartBookingForm({ yacht, onBookingComplete }: BookingFormProps) {
+  const [step, setStep] = useState<'details' | 'availability' | 'payment' | 'confirmation'>('details')
   const [isLoading, setIsLoading] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [availability, setAvailability] = useState<any>(null)
+  const [pricing, setPricing] = useState<any>(null)
   const [formData, setFormData] = useState({
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
     guests: 1,
     specialRequests: '',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
   })
+
+  const supabase = createClient()
+
+  // Check user authentication
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUser({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name
+        })
+      }
+    }
+    checkUser()
+  }, [])
 
   const calculateTotalPrice = () => {
     if (!formData.startDate || !formData.endDate) return 0
     const days = Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))
-    return yacht.price * days
+    const basePrice = yacht.price * days
+    const serviceCharge = basePrice * 0.1
+    const tax = (basePrice + serviceCharge) * 0.15
+    return basePrice + serviceCharge + tax
   }
 
-  const handleSubmitDetails = async () => {
-    if (!formData.startDate || !formData.endDate || !formData.contactName || !formData.contactEmail) {
-      toast.error('Please fill in all required fields')
+  const checkAvailability = async () => {
+    if (!formData.startDate || !formData.endDate) {
+      toast.error('Please select start and end dates')
       return
     }
 
@@ -60,22 +87,39 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
       return
     }
 
-    if (formData.startDate >= formData.endDate) {
-      toast.error('End date must be after start date')
-      return
-    }
-
     setIsLoading(true)
     try {
-      // Here you would typically create a booking in your database
-      // For now, we'll simulate it
-      const mockBookingId = `booking_${Date.now()}`
-      setBookingId(mockBookingId)
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          yachtId: yacht.id,
+          startDate: formData.startDate.toISOString().split('T')[0],
+          endDate: formData.endDate.toISOString().split('T')[0],
+          guests: formData.guests,
+          specialRequests: formData.specialRequests
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.requiresAuth) {
+          toast.error('Please log in to make a booking')
+          return
+        }
+        toast.error(data.error || 'Failed to check availability')
+        return
+      }
+
+      setAvailability(data.availability)
+      setPricing(data.pricing)
+      setBookingId(data.booking.id)
       setStep('payment')
-      toast.success('Booking details saved! Proceed to payment.')
+      toast.success('Availability confirmed! Proceed to payment.')
     } catch (error) {
-      console.error('Booking creation error:', error)
-      toast.error('Failed to create booking. Please try again.')
+      console.error('Availability check error:', error)
+      toast.error('Failed to check availability. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -91,6 +135,18 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
     toast.error(`Payment failed: ${error}`)
   }
 
+  const handleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    if (error) {
+      toast.error('Login failed. Please try again.')
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Progress Indicator */}
@@ -104,21 +160,49 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
         <div className="w-16 h-1 bg-gray-200 rounded"></div>
         <div className={cn(
           "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium",
-          step === 'payment' ? "bg-primary text-primary-foreground" : "bg-gray-200 text-gray-600"
+          step === 'availability' ? "bg-primary text-primary-foreground" : "bg-gray-200 text-gray-600"
         )}>
           2
         </div>
         <div className="w-16 h-1 bg-gray-200 rounded"></div>
         <div className={cn(
           "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium",
-          step === 'confirmation' ? "bg-primary text-primary-foreground" : "bg-gray-200 text-gray-600"
+          step === 'payment' ? "bg-primary text-primary-foreground" : "bg-gray-200 text-gray-600"
         )}>
           3
         </div>
+        <div className="w-16 h-1 bg-gray-200 rounded"></div>
+        <div className={cn(
+          "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium",
+          step === 'confirmation' ? "bg-primary text-primary-foreground" : "bg-gray-200 text-gray-600"
+        )}>
+          4
+        </div>
       </div>
 
+      {/* Authentication Check */}
+      {!user && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-800">
+              <LogIn className="h-5 w-5" />
+              Login Required
+            </CardTitle>
+            <CardDescription className="text-orange-700">
+              You need to be logged in to make a booking
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleLogin} className="w-full">
+              <User className="mr-2 h-4 w-4" />
+              Login with Google
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Step 1: Booking Details */}
-      {step === 'details' && (
+      {step === 'details' && user && (
         <Card>
           <CardHeader>
             <CardTitle>Booking Details</CardTitle>
@@ -127,6 +211,14 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* User Info */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 text-green-800">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-semibold">Logged in as: {user.full_name || user.email}</span>
+              </div>
+            </div>
+
             {/* Yacht Summary */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold text-lg">{yacht.name}</h3>
@@ -158,6 +250,7 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
                       selected={formData.startDate}
                       onSelect={(date) => setFormData(prev => ({ ...prev, startDate: date }))}
                       initialFocus
+                      disabled={(date) => date < new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -184,6 +277,7 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
                       selected={formData.endDate}
                       onSelect={(date) => setFormData(prev => ({ ...prev, endDate: date }))}
                       initialFocus
+                      disabled={(date) => date < (formData.startDate || new Date())}
                     />
                   </PopoverContent>
                 </Popover>
@@ -208,39 +302,6 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Contact Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contactName">Full Name *</Label>
-                <Input
-                  id="contactName"
-                  value={formData.contactName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
-                  placeholder="Enter your full name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">Email *</Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                  placeholder="Enter your email"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contactPhone">Phone Number</Label>
-              <Input
-                id="contactPhone"
-                value={formData.contactPhone}
-                onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
-                placeholder="Enter your phone number"
-              />
             </div>
 
             {/* Special Requests */}
@@ -268,6 +329,14 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
                     <span>Duration:</span>
                     <span>{Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))} days</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Service Charge (10%):</span>
+                    <span>${(yacht.price * Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24)) * 0.1).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax (15%):</span>
+                    <span>${(calculateTotalPrice() * 0.15).toFixed(2)}</span>
+                  </div>
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total:</span>
                     <span>${calculateTotalPrice().toLocaleString()}</span>
@@ -277,17 +346,17 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
             )}
 
             <Button
-              onClick={handleSubmitDetails}
-              disabled={isLoading}
+              onClick={checkAvailability}
+              disabled={isLoading || !formData.startDate || !formData.endDate}
               className="w-full"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  Checking Availability...
                 </>
               ) : (
-                'Continue to Payment'
+                'Check Availability & Proceed'
               )}
             </Button>
           </CardContent>
@@ -296,13 +365,31 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
 
       {/* Step 2: Payment */}
       {step === 'payment' && bookingId && (
-        <PaymentComponent
-          bookingId={bookingId}
-          amount={calculateTotalPrice()}
-          yachtName={yacht.name}
-          onPaymentSuccess={handlePaymentSuccess}
-          onPaymentError={handlePaymentError}
-        />
+        <div className="space-y-4">
+          {availability && (
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <CheckCircle className="h-5 w-5" />
+                  Availability Confirmed
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-green-700">
+                <p>✅ Yacht is available for your selected dates</p>
+                <p>✅ Capacity confirmed: {formData.guests} guests</p>
+                <p>✅ Remaining capacity: {availability.remainingCapacity} guests</p>
+              </CardContent>
+            </Card>
+          )}
+          
+          <PaymentComponent
+            bookingId={bookingId}
+            amount={pricing?.totalPrice || calculateTotalPrice()}
+            yachtName={yacht.name}
+            onPaymentSuccess={handlePaymentSuccess}
+            onPaymentError={handlePaymentError}
+          />
+        </div>
       )}
 
       {/* Step 3: Confirmation */}
@@ -322,7 +409,7 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
                 <div><strong>Dates:</strong> {formData.startDate && formData.endDate ? 
                   `${format(formData.startDate, "PPP")} - ${format(formData.endDate, "PPP")}` : 'N/A'}</div>
                 <div><strong>Guests:</strong> {formData.guests}</div>
-                <div><strong>Total:</strong> ${calculateTotalPrice().toLocaleString()}</div>
+                <div><strong>Total:</strong> ${(pricing?.totalPrice || calculateTotalPrice()).toLocaleString()}</div>
                 <div><strong>Booking ID:</strong> {bookingId}</div>
               </div>
             </div>
@@ -337,3 +424,6 @@ export default function BookingForm({ yacht, onBookingComplete }: BookingFormPro
     </div>
   )
 }
+
+
+
