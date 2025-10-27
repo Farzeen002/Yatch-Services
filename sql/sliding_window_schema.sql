@@ -53,3 +53,4 @@ ALTER TABLE public.chat_sessions
 ALTER COLUMN expires_at SET DEFAULT NOW() + INTERVAL '24 hours';
 
 
+

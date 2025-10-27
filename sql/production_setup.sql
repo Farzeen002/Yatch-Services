@@ -138,3 +138,4 @@ GRANT ALL ON public.receipts TO authenticated;
 GRANT ALL ON public.payment_audit_logs TO authenticated;
 
 
+

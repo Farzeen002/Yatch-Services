@@ -24,3 +24,4 @@ ORDER BY price ASC;
 -- DELETE FROM yachts WHERE name NOT IN ('Ocean Dream', 'Sea Breeze', 'Royal Wave', 'Marina Star', 'Azure Explorer');
 
 
+

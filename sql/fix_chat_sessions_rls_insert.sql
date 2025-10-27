@@ -54,3 +54,4 @@ BEGIN
     RAISE NOTICE 'Users can now INSERT, SELECT, UPDATE, and DELETE their own chat sessions';
 END $$;
 
+
