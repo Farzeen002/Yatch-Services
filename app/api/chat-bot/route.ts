@@ -45,8 +45,13 @@ function updateContextFromMessage(message: string, currentContext: any) {
     }
   }
   
-  // Also check for partial yacht name matches
-  if (!updatedContext.selectedYacht) {
+  // Also check for partial yacht name matches ONLY if no yacht is currently selected
+  // AND if the message seems to be asking about a specific yacht
+  const askingAboutYacht = messageLower.includes('which') || messageLower.includes('what') || 
+                           messageLower.includes('show') || messageLower.includes('tell') ||
+                           messageLower.includes('about') || messageLower.includes('yacht')
+  
+  if (!updatedContext.selectedYacht && askingAboutYacht) {
     for (const yacht of fallbackYachts) {
       const yachtWords = yacht.name.toLowerCase().split(' ')
       const messageWords = messageLower.split(' ')
@@ -66,6 +71,9 @@ function updateContextFromMessage(message: string, currentContext: any) {
     }
   }
   
+  // IMPORTANT: If a yacht was already selected and no new yacht was mentioned,
+  // preserve the existing selection (already done via spread operator on line 26)
+  
   // Check for guest count
   const guestPatterns = [
     /(\d+)\s*(?:people?|guests?|ppl|person)/i,
@@ -79,6 +87,21 @@ function updateContextFromMessage(message: string, currentContext: any) {
     const match = message.match(pattern)
     if (match) {
       updatedContext.guestCount = parseInt(match[1])
+      break
+    }
+  }
+  
+  // Check for duration/number of days
+  const durationPatterns = [
+    /(\d+)\s*(?:days?|nights?)/i,
+    /for\s+(\d+)\s*(?:days?|nights?)/i,
+    /(\d+)\s*(?:days?|nights?)\s+(?:trip|booking|rental)/i
+  ]
+  
+  for (const pattern of durationPatterns) {
+    const match = message.match(pattern)
+    if (match) {
+      updatedContext.duration = parseInt(match[1])
       break
     }
   }
@@ -357,6 +380,9 @@ export async function POST(request: Request) {
     // 2.3. GET CHAT SESSION FROM MEMORY
     const chatSession = user ? await chatMemory.getChatSession(sessionId, user.id) : null
     console.log('Chat session found:', !!chatSession, 'Messages:', chatSession?.messages?.length || 0)
+    
+    // Check if there's active conversation context
+    const hasActiveContext = chatSession?.context?.selectedYacht || chatSession?.context?.bookingIntent || (chatSession?.messages?.length || 0) > 1
 
     // 3. CHECK FOR CLEAR CHAT COMMAND
     if (message.toLowerCase().includes('clear chat') && user) {
@@ -366,9 +392,12 @@ export async function POST(request: Request) {
         type: "system"
       })
     }
-
-    // 4. CHECK IF QUERY IS YACHT-RELATED
-    if (!isYachtRelated(message)) {
+    
+    // 4. CHECK IF QUERY IS YACHT-RELATED (Skip check if there's active conversation context)
+    const isShortResponse = message.trim().split(/\s+/).length <= 3 // 3 words or less
+    const isNumericResponse = /^\d+$/.test(message.trim()) // Just a number
+    
+    if (!hasActiveContext && !isYachtRelated(message) && !isShortResponse && !isNumericResponse) {
       return Response.json({ 
         response: "I'm here to assist only with yacht-related services. Please ask me about yacht charters, bookings, pricing, or yacht information.",
         type: "redirect" 
@@ -389,30 +418,67 @@ export async function POST(request: Request) {
     }
     
     // 5.5. HANDLE BOOKING STATUS QUERIES
-    if (userAuthenticated && message.toLowerCase().includes('booking') && message.toLowerCase().includes('status')) {
+    const bookingCheckKeywords = ['my booking', 'check booking', 'view booking', 'show booking', 'booking status', 'my reservations']
+    const isBookingCheck = bookingCheckKeywords.some(keyword => message.toLowerCase().includes(keyword))
+    
+    if (userAuthenticated && isBookingCheck) {
       try {
-        const statusResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/bookings/status`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        })
+        // Create admin Supabase client to bypass RLS
+        const adminSupabase = createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            cookies: {
+              getAll() { return [] },
+              setAll() { /* no-op */ },
+            },
+          }
+        )
         
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json()
-          const statusText = statusData.bookings.length > 0 
-            ? `You have ${statusData.bookings.length} booking(s):\n\n` + 
-              statusData.bookings.map((booking: any) => 
-                `📅 **${booking.yacht?.name || 'Unknown Yacht'}**\n` +
-                `Status: ${booking.status}\n` +
-                `Dates: ${booking.start_date} to ${booking.end_date}\n` +
-                `Guests: ${booking.guests}\n` +
-                `Total: $${booking.total_price}\n`
-              ).join('\n')
-            : "You don't have any bookings yet. Would you like to book a yacht?"
-          
-          return Response.json({ response: statusText, type: "ai" })
+        // Query the database directly using admin client
+        const { data: bookings, error } = await adminSupabase
+          .from('bookings')
+          .select(`
+            *,
+            yachts (
+              name,
+              type,
+              location,
+              price,
+              images
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('Error fetching bookings:', error)
+          return Response.json({ 
+            response: "I couldn't fetch your bookings at the moment. Please try again or check the 'My Bookings' page.", 
+            type: "ai" 
+          })
         }
+        
+         const statusText = bookings && bookings.length > 0 
+          ? `You have ${bookings.length} booking(s):\n\n` + 
+            bookings.map((booking: any, index: number) => 
+              `${index + 1}. ${booking.yachts?.name || 'Unknown Yacht'}\n` +
+              `Location: ${booking.yachts?.location || 'N/A'}\n` +
+              `Dates: ${booking.start_date} to ${booking.end_date}\n` +
+              `Guests: ${booking.guests}\n` +
+              `Total: $${booking.total_price}\n` +
+              `Status: ${booking.status}\n` +
+              `Payment: ${booking.payment_status}\n`
+            ).join('\n')
+          : "You don't have any bookings yet.\n\nWould you like to book a yacht? I can show you our available yachts and help you make a reservation!"
+        
+        return Response.json({ response: statusText, type: "ai" })
       } catch (error) {
         console.error('Error fetching booking status:', error)
+        return Response.json({ 
+          response: "I encountered an error fetching your bookings. Please try again.", 
+          type: "ai" 
+        })
       }
     }
 
@@ -431,17 +497,30 @@ export async function POST(request: Request) {
     // Update context based on message
     const updatedContext = updateContextFromMessage(message, context)
     
+    console.log('=== CONTEXT UPDATE ===')
+    console.log('Previous context:', JSON.stringify(context, null, 2))
+    console.log('Updated context:', JSON.stringify(updatedContext, null, 2))
+    console.log('Selected Yacht:', updatedContext.selectedYacht || 'NONE')
+    console.log('===================')
+    
     // 7. FETCH YACHT DATA FROM SUPABASE
     const yachts = await getYachtsFromDatabase()
     
-    // 8. BUILD CONVERSATION HISTORY FOR AI (SLIDING WINDOW)
+    // 8. BUILD CONVERSATION HISTORY FOR AI (SLIDING WINDOW - PRIORITIZE LATEST 5)
     const MAX_CONTEXT_MESSAGES = 10
-    const recentMessages = messages.slice(-MAX_CONTEXT_MESSAGES)
-    const conversationHistory = recentMessages.map(msg => 
-      `${msg.role === 'user' ? 'User' : 'Marina'}: ${msg.content}`
-    ).join('\n')
+    const PRIORITY_MESSAGE_COUNT = 5
     
-    console.log(`Using ${recentMessages.length} recent messages (sliding window) to prevent token overflow`)
+    const recentMessages = messages.slice(-MAX_CONTEXT_MESSAGES)
+    const priorityMessages = messages.slice(-PRIORITY_MESSAGE_COUNT)
+    
+    // Build conversation history with latest messages highlighted
+    const conversationHistory = recentMessages.map((msg, index) => {
+      const isPriority = index >= recentMessages.length - PRIORITY_MESSAGE_COUNT
+      const prefix = isPriority ? '[RECENT] ' : '[OLDER] '
+      return `${prefix}${msg.role === 'user' ? 'User' : 'Marina'}: ${msg.content}`
+    }).join('\n')
+    
+    console.log(`Using ${recentMessages.length} recent messages (sliding window), ${PRIORITY_MESSAGE_COUNT} marked as priority`)
     
     // 9. CREATE YACHT CONTEXT
     const yachtContext = `
@@ -451,10 +530,11 @@ ${yachts.map(y =>
 ).join('\n')}
 
 CURRENT CONVERSATION CONTEXT:
-- Selected Yacht: ${updatedContext.selectedYacht || 'None yet'}
-- Guest Count: ${updatedContext.guestCount || 'Not specified'}
-- Booking Intent: ${updatedContext.bookingIntent ? 'Yes' : 'No'}
-- User Authenticated: ${userAuthenticated ? 'Yes' : 'No'}
+- Selected Yacht: ${updatedContext.selectedYacht ? updatedContext.selectedYacht + ' (CONFIRMED - USE THIS YACHT)' : 'None yet - ask user to choose'}
+- Guest Count: ${updatedContext.guestCount ? updatedContext.guestCount + ' guests' : 'Not specified - need to ask'}
+- Duration: ${updatedContext.duration ? updatedContext.duration + ' days' : 'Not specified - need to ask'}
+- Booking Intent: ${updatedContext.bookingIntent ? 'Yes - User wants to book' : 'No'}
+- User Authenticated: ${userAuthenticated ? 'Yes - Can proceed with payment' : 'No - Need login for booking'}
 - Booking Details: ${updatedContext.bookingDetails ? JSON.stringify(updatedContext.bookingDetails) : 'None'}
 
 SERVICES OFFERED:
@@ -497,9 +577,10 @@ CAPACITY MANAGEMENT:
 
 CRITICAL INSTRUCTIONS:
 - You MUST maintain conversation context and remember previous interactions
+- DO NOT use emojis in your responses
+- Pay special attention to messages marked [RECENT] in the conversation history
 - If user has selected a yacht, reference it specifically and use that yacht's details
 - If user mentioned guest count, use that information in your response
-- If user is checking availability, provide specific next steps for their selected yacht
 - Be consistent with previous responses in the same conversation
 - ONLY respond to yacht-related queries
 - Be helpful, professional, and engaging (2-4 sentences)
@@ -509,25 +590,40 @@ CRITICAL INSTRUCTIONS:
 - Provide specific details about yachts when asked
 - Help with pricing calculations when requested
 - Guide users through the booking process
-- If user is NOT authenticated, mention they need to log in to complete bookings
-- If user IS authenticated, proceed with booking confirmation and payment options
+- NEVER generate fake payment links or URLs
+- Payment will be handled automatically by a secure payment button
+
+SLIDING WINDOW CONTEXT PRIORITY:
+- The conversation history includes [RECENT] and [OLDER] labels
+- [RECENT] messages are the LATEST 5 messages - these are MOST IMPORTANT
+- [OLDER] messages provide background context but prioritize recent ones
+- Always consider recent messages when understanding user intent
+- If recent messages conflict with older ones, trust the recent messages
 
 CONTEXT AWARENESS:
-- If user selected "Ocean Dream" and mentioned "3 ppl", respond about Ocean Dream for 3 people
-- If user said "yes check", they want to check availability for their selected yacht
-- If user provided a date like "23/10/2025", they want to book for that date
-- If user said "I have logged in already" or similar, they are authenticated and ready to proceed with payment
-- If user asks for "generate bill" or "payment", provide the booking summary and payment options
-- Always reference the specific yacht they selected in your responses
-- Use the guest count they mentioned in your calculations
-- If user is authenticated and has booking details, proceed with payment process
+- Check "CURRENT CONVERSATION CONTEXT" section for Selected Yacht, Guest Count, and Duration
+- If "Selected Yacht" is set, ONLY talk about that yacht - DO NOT switch
+- If user asks "can u book" or "book it", they mean the yacht ALREADY SELECTED
+- Always reference the EXACT yacht from "Selected Yacht" field
+- NEVER change the selected yacht unless user explicitly asks about a different yacht by name
+
+BOOKING REQUIREMENTS (CRITICAL):
+- To proceed with booking, you MUST have ALL THREE: Yacht Name, Number of Guests, Number of Days
+- If ANY of these are missing, ask the user to provide them in this format:
+  "To proceed with your booking, please provide:
+   Yacht Name: [yacht name]
+   Number of Guests: [number]
+   Number of Days: [number]"
+- DO NOT proceed to payment unless all three are confirmed
+- DO NOT assume or default any values
 
 AUTHENTICATION HANDLING:
 - If User Authenticated: "Yes" - DO NOT ask them to log in again
-- If User Authenticated: "Yes" - Proceed directly to booking confirmation and payment
-- If User Authenticated: "Yes" - Generate Razorpay payment link for Saudi Arabia
+- If User Authenticated: "Yes" - Proceed directly to booking confirmation
 - If User Authenticated: "Yes" - Provide booking summary with total cost
 - NEVER ask authenticated users to log in again
+- DO NOT generate fake payment links or URLs
+- Payment button will be automatically added by the system
 
 CRITICAL: If the user says "i have logged in already" or similar, they are authenticated. 
 DO NOT give the generic "I can only help with yacht-related inquiries" response.
@@ -580,7 +676,8 @@ Respond as Marina, maintaining conversation context and providing helpful yacht 
           
           // Fallback response based on context
           if (updatedContext.bookingIntent && updatedContext.selectedYacht) {
-            text = `I understand you'd like to book the ${updatedContext.selectedYacht} for ${updatedContext.guestCount || 2} guests. I'm experiencing some technical difficulties with our AI system, but I can still help you with your booking. Please try again in a moment, or contact our support team for immediate assistance.`
+            const guestInfo = updatedContext.guestCount ? `for ${updatedContext.guestCount} guests` : ''
+            text = `I understand you'd like to book the ${updatedContext.selectedYacht} ${guestInfo}. I'm experiencing some technical difficulties with our AI system, but I can still help you with your booking. Please try again in a moment, or contact our support team for immediate assistance.`
           } else if (updatedContext.selectedYacht) {
             text = `I can see you're interested in the ${updatedContext.selectedYacht}. I'm experiencing some technical difficulties with our AI system, but I can still help you with yacht information. Please try again in a moment.`
           } else {
@@ -625,11 +722,28 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
       return Response.json({ response: text, type: "ai" })
     }
     
-    // Create booking details if not exists
+    // CHECK IF ALL REQUIRED BOOKING DETAILS ARE PROVIDED
+    const missingDetails = []
+    if (!updatedContext.selectedYacht) missingDetails.push('Yacht Name')
+    if (!updatedContext.guestCount) missingDetails.push('Number of Guests')
+    if (!updatedContext.duration) missingDetails.push('Number of Days')
+    
+    if (missingDetails.length > 0) {
+      const askDetailsResponse = `To proceed with your booking, please provide the following information:\n\n` +
+        `Yacht Name: ${updatedContext.selectedYacht || '[please specify]'}\n` +
+        `Number of Guests: ${updatedContext.guestCount || '[please specify]'}\n` +
+        `Number of Days: ${updatedContext.duration || '[please specify]'}\n\n` +
+        `Missing: ${missingDetails.join(', ')}\n\n` +
+        (selectedYacht ? `Note: ${selectedYacht.name} can accommodate up to ${selectedYacht.guests} guests.` : '')
+      
+      return Response.json({ response: askDetailsResponse, type: "ai" })
+    }
+    
+    // Create booking details using confirmed values
     const bookingDetails = updatedContext.bookingDetails || {
       yachtName: updatedContext.selectedYacht,
-      duration: 3, // Default 3 days
-      totalPrice: (selectedYacht?.price || fallbackYachts.find(y => y.name === updatedContext.selectedYacht)?.price || 1200) * 3,
+      duration: updatedContext.duration, // Use user-specified duration
+      totalPrice: (selectedYacht?.price || fallbackYachts.find(y => y.name === updatedContext.selectedYacht)?.price || 1200) * updatedContext.duration,
       startDate: new Date().toISOString().split('T')[0] // Today's date
     }
     
@@ -642,7 +756,7 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
         yachtId: yachtId,
         duration: bookingDetails.duration,
         totalPrice: bookingDetails.totalPrice,
-        guestCount: updatedContext.guestCount || 2,
+        guestCount: updatedContext.guestCount, // No longer defaults to 2
         startDate: bookingDetails.startDate,
         userId: user?.id // Pass user ID to payment API
       })
@@ -651,14 +765,14 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
     if (paymentResponse.ok) {
       const paymentData = await paymentResponse.json()
       
-      // Return payment data for button
-      const enhancedResponse = `${text}\n\n🚢 **BOOKING DETAILS** 🚢\n\n` +
-        `**Yacht:** ${bookingDetails.yachtName}\n` +
-        `**Duration:** ${bookingDetails.duration} days\n` +
-        `**Start Date:** ${bookingDetails.startDate}\n` +
-        `**Guests:** ${updatedContext.guestCount || 2}\n` +
-        `**Total:** ₹${bookingDetails.totalPrice.toLocaleString()}\n\n` +
-        `💳 **Click the payment button below to complete your booking**\n` +
+      // Return payment data for button (without AI text to avoid fake links)
+      const enhancedResponse = `BOOKING CONFIRMED\n\n` +
+        `Yacht: ${bookingDetails.yachtName}\n` +
+        `Duration: ${bookingDetails.duration} days\n` +
+        `Start Date: ${bookingDetails.startDate}\n` +
+        `Guests: ${updatedContext.guestCount}\n` +
+        `Total: Rs ${bookingDetails.totalPrice.toLocaleString()}\n\n` +
+        `Click the secure payment button below to complete your booking\n` +
         `Order ID: ${paymentData.order.id}`
       
       // CRITICAL: Return ONLY ONCE with payment button data
@@ -675,17 +789,17 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
           yachtName: bookingDetails.yachtName,
         }
       })
-    } else {
-      console.error('Payment creation failed:', await paymentResponse.text())
-      const errorResponse = `${text}\n\n⚠️ **Payment Setup Failed**\n\nI encountered an issue setting up your payment. Please try again or contact support.`
+      } else {
+        console.error('Payment creation failed:', await paymentResponse.text())
+        const errorResponse = `${text}\n\nPayment Setup Failed\n\nI encountered an issue setting up your payment. Please try again or contact support.`
+        return Response.json({ response: errorResponse, type: "ai" })
+      }
+    } catch (error) {
+      console.error('Payment processing error:', error)
+      const errorResponse = `${text}\n\nPayment Processing Error\n\nI encountered an error processing your payment. Please try again.`
       return Response.json({ response: errorResponse, type: "ai" })
     }
-  } catch (error) {
-    console.error('Payment processing error:', error)
-    const errorResponse = `${text}\n\n⚠️ **Payment Processing Error**\n\nI encountered an error processing your payment. Please try again.`
-    return Response.json({ response: errorResponse, type: "ai" })
   }
-}
 
 // IMPORTANT: Only reached if payment processing was NOT triggered
 return Response.json({ response: text, type: "ai" })

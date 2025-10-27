@@ -1,10 +1,10 @@
 import Razorpay from 'razorpay'
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_KEY_SECRET!,
 })
 
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create Supabase client
-    const supabase = createClient()
+    // Create Supabase admin client (bypasses RLS for server-side operations)
+    const supabase = createAdminClient()
 
     // Create booking in database first
     const { data: booking, error: bookingError } = await supabase
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         id: booking.id,
         status: booking.status,
       },
-      razorpayKey: process.env.RAZORPAY_KEY_ID,
+      razorpayKey: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     })
   } catch (error: any) {
     console.error('Payment order creation error:', error)

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
-import Chatbot from "@/components/chatbot"
 import Footer from "@/components/footer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -252,7 +251,6 @@ export default function AdminPage() {
         </Tabs>
       </div>
 
-      <Chatbot />
       <Footer />
     </main>
 

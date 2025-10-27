@@ -1,9 +1,9 @@
-import { createClient } from "@/utils/supabase/server"
+import { createServerSupabaseClient } from "@/utils/supabase/server"
 import { checkYachtAvailability, createBooking, calculateBookingPrice } from "@/lib/booking-utils"
 
 export async function POST(request: Request) {
   try {
-    const { yachtId, startDate, endDate, guests, specialRequests } = await request.json()
+    const { yachtId, startDate, endDate, guests } = await request.json()
     
     // Validate input
     if (!yachtId || !startDate || !endDate || !guests) {
@@ -13,8 +13,8 @@ export async function POST(request: Request) {
       )
     }
     
-    // Check if user is authenticated
-    const supabase = createClient()
+    // Check if user is authenticated (with cookies)
+    const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
@@ -58,8 +58,7 @@ export async function POST(request: Request) {
       startDate,
       endDate,
       guests,
-      totalPrice: pricing.totalPrice,
-      specialRequests
+      totalPrice: pricing.totalPrice
     })
     
     if (!bookingResult.success) {
@@ -90,7 +89,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {

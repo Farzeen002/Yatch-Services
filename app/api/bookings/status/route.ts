@@ -1,31 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { getAuthenticatedUser, isAuthenticated } from '@/lib/auth'
+import { createServerSupabaseClient } from '@/utils/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. AUTHENTICATION CHECK
-    const user = await getAuthenticatedUser()
-    if (!isAuthenticated(user)) {
+    const { searchParams } = new URL(request.url)
+    const bookingId = searchParams.get('booking_id')
+
+    // Get authenticated Supabase client (reads cookies)
+    const supabase = await createServerSupabaseClient()
+    
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
       return NextResponse.json(
         { success: false, error: 'Please sign in to view booking status.' },
         { status: 401 }
       )
     }
-
-    const { searchParams } = new URL(request.url)
-    const bookingId = searchParams.get('booking_id')
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return [] },
-          setAll() { /* no-op for API routes */ },
-        },
-      }
-    )
 
     let query = supabase
       .from('bookings')
@@ -35,24 +27,8 @@ export async function GET(request: NextRequest) {
           name,
           type,
           location,
-          price
-        ),
-        payments (
-          id,
-          status,
-          amount,
-          currency,
-          razorpay_order_id,
-          razorpay_payment_id,
-          created_at
-        ),
-        receipts (
-          id,
-          receipt_number,
-          amount,
-          currency,
-          status,
-          created_at
+          price,
+          images
         )
       `)
       .eq('user_id', user.id)
@@ -75,14 +51,13 @@ export async function GET(request: NextRequest) {
     const formattedBookings = bookings?.map(booking => ({
       id: booking.id,
       status: booking.status,
+      payment_status: booking.payment_status,
       start_date: booking.start_date,
       end_date: booking.end_date,
       guests: booking.guests,
       total_price: booking.total_price,
       created_at: booking.created_at,
-      yacht: booking.yachts,
-      payment: booking.payments?.[0] || null,
-      receipt: booking.receipts?.[0] || null
+      yacht: booking.yachts
     })) || []
 
     return NextResponse.json({
