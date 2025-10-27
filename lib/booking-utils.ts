@@ -1,9 +1,9 @@
-import { createClient } from "@/utils/supabase/server"
+import { createServerSupabaseClient } from "@/utils/supabase/server"
 
 // Function to check yacht availability and capacity
 export async function checkYachtAvailability(yachtId: string, startDate: string, endDate: string, requestedGuests: number) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     
     // Get yacht details
     const { data: yacht, error: yachtError } = await supabase
@@ -69,10 +69,9 @@ export async function createBooking(bookingData: {
   endDate: string
   guests: number
   totalPrice: number
-  specialRequests?: string
 }) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     
     // First check availability
     const availability = await checkYachtAvailability(
@@ -96,8 +95,8 @@ export async function createBooking(bookingData: {
         end_date: bookingData.endDate,
         guests: bookingData.guests,
         total_price: bookingData.totalPrice,
-        status: 'pending',
-        special_requests: bookingData.specialRequests
+        status: 'pending'
+        // Note: special_requests removed as column doesn't exist in DB
       })
       .select(`
         *,
@@ -121,7 +120,7 @@ export async function createBooking(bookingData: {
 // Function to get user bookings
 export async function getUserBookings(userId: string) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     
     const { data: bookings, error } = await supabase
       .from('bookings')

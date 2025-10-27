@@ -1,10 +1,10 @@
 import Razorpay from 'razorpay'
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_KEY_SECRET!,
 })
 
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create Supabase client
-    const supabase = createClient()
+    // Create Supabase admin client (bypasses RLS)
+    const supabase = createAdminClient()
 
     // Verify booking exists and get details
     const { data: booking, error: bookingError } = await supabase

@@ -24,7 +24,7 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
   const [paymentProcessing, setPaymentProcessing] = useState(false)
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { messages, addMessage, isLoaded } = useChatHistory()
+  const { messages, addMessage, clearHistory, isLoaded } = useChatHistory()
 
   const quickOptions = [
     "View available yachts",
@@ -232,6 +232,20 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
     }
   }
 
+  const handleClearChat = () => {
+    if (confirm("Are you sure you want to clear the chat history?")) {
+      clearHistory()
+      // Add welcome message after clearing
+      const greeting: ExtendedChatMessage = {
+        id: Date.now(),
+        text: "Hi! I'm Marina, your AI yacht booking assistant. How can I help you today?",
+        sender: "bot",
+        timestamp: new Date(),
+      }
+      addMessage(greeting)
+    }
+  }
+
   if (!isLoaded) return null
 
   return (
@@ -256,14 +270,27 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
             className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200"
           >
             {/* Header */}
-            <div className="bg-linear-to-r from-primary to-blue-900 text-white p-4 rounded-t-2xl flex justify-between items-start">
+            <div className="bg-linear-to-r from-primary to-blue-900 text-white p-4 rounded-t-2xl flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-lg">Marina AI Assistant</h3>
                 <p className="text-sm text-blue-100">Instant yacht booking support</p>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white hover:text-blue-100 transition-colors text-xl">
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleClearChat}
+                  className="text-white hover:text-blue-100 transition-colors text-sm px-2 py-1 rounded hover:bg-white/10"
+                  title="Clear chat history"
+                >
+                  🗑️
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)} 
+                  className="text-white hover:text-blue-100 transition-colors text-xl"
+                  title="Close chat"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -313,6 +340,23 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
                               </div>
                             )
                           }
+                          
+                          // Render bold text (**text**)
+                          const boldParts = line.split(/\*\*([^*]+)\*\*/g)
+                          if (boldParts.length > 1) {
+                            return (
+                              <div key={index} className="mb-1">
+                                {boldParts.map((part, partIndex) => {
+                                  // Odd indices are the bold text
+                                  if (partIndex % 2 === 1) {
+                                    return <strong key={partIndex} className="font-bold">{part}</strong>
+                                  }
+                                  return <span key={partIndex}>{part}</span>
+                                })}
+                              </div>
+                            )
+                          }
+                          
                           return <div key={index} className="mb-1">{line}</div>
                         })}
                       </div>

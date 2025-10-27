@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import BookingForm from "@/components/booking-form"
 import PaymentComponent from "@/components/payment-component"
-import Chatbot from "@/components/chatbot"
 
 // Sample yacht data
 const sampleYacht = {
@@ -206,9 +205,6 @@ export default function TestIntegrationPage() {
             )}
           </div>
         </div>
-
-        {/* Chatbot Component */}
-        <Chatbot />
       </div>
     </div>
   )

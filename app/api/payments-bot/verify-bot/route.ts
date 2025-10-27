@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
 export async function POST(request: Request) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // Signature is valid, update booking in database
-    const supabase = createClient()
+    const supabase = createAdminClient()
     
     // Update booking status (removed payment_status for compatibility)
     const { data: booking, error: updateError } = await supabase
