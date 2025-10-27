@@ -153,7 +153,7 @@ export default function Navigation() {
                 key={link.href}
                 href={
                   link.href === "/yachts" && user?.role === "admin"
-                    ? "/admin/yachts"
+                    ? "/yachts"
                     : link.href
                 }
                 className={`text-sm font-medium transition-colors ${
