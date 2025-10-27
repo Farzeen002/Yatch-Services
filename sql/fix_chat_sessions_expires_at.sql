@@ -10,3 +10,4 @@ WHERE expires_at IS NULL;
 -- Create index for expires_at for better performance
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_expires_at ON public.chat_sessions USING btree (expires_at);
 
+

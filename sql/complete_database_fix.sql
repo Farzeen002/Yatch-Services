@@ -319,3 +319,4 @@ BEGIN
     RAISE NOTICE 'Sample yachts inserted if table was empty';
 END $$;
 
+

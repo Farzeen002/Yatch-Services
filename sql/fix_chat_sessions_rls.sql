@@ -41,3 +41,4 @@ CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions (us
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_session_id ON public.chat_sessions (session_id);
 
 
+

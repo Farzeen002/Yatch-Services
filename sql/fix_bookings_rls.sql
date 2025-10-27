@@ -59,3 +59,4 @@ BEGIN
     RAISE NOTICE 'All required columns and indexes are in place';
 END $$;
 
+
