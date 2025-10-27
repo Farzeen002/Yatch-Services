@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Menu as HeadlessMenu } from "@headlessui/react"
 import LoginPopup from "./LoginPopup"
-import ProfileModal from "@/app/profile/page"
+import ProfileModal from "./ProfileModal"
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -31,28 +31,43 @@ export default function Navigation() {
   ]
 
   // Fetch user profile
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: authData, error: authError } = await supabase.auth.getUser()
-      if (authError || !authData.user) return
+ useEffect(() => {
+  const fetchUser = async () => {
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    if (authError || !authData.user) return
 
-      const { data: profile, error: profileError } = await supabase
-        .from("users")
-        .select("username, profile_image, role_type")
-        .eq("id", authData.user.id)
-        .single()
+    const user = authData.user
 
-      if (profileError) return
+    const { data: profile, error: profileError } = await supabase
+      .from("users")
+      .select("username, profile_image, role_type")
+      .eq("id", user.id)
+      .single()
 
-      setUser({
-        name: profile.username || "User",
-        image: profile.profile_image || "/profile-placeholder.png",
-        role: profile.role_type || "user",
-      })
-    }
+    if (profileError) return
 
-    fetchUser()
-  }, [supabase])
+    // ✅ Choose the best image source available
+    const finalImage =
+      profile?.profile_image && profile.profile_image.trim() !== ""
+        ? profile.profile_image
+        : user.user_metadata?.avatar_url ||
+          user.user_metadata?.picture ||
+          "/profile-placeholder.png"
+
+    setUser({
+      name:
+        profile?.username ||
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "User",
+      image: finalImage,
+      role: profile?.role_type || "user",
+    })
+  }
+
+  fetchUser()
+}, [supabase])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
