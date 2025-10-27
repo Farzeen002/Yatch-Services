@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/lib/language-context"
 import { Toaster } from "@/components/ui/toaster"
-import Chatbot from "@/components/chatbot"
+import WhosYEPAIChatbot from "@/components/whosyep-ai-chatbot"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
@@ -26,7 +26,7 @@ export default function RootLayout({
       <body className={`${geist.className} font-sans antialiased`}>
         <LanguageProvider>
           {children}
-          <Chatbot />
+          <WhosYEPAIChatbot />
           <Toaster />
         </LanguageProvider>
         <Analytics />

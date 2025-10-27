@@ -393,6 +393,30 @@ export async function POST(request: Request) {
       })
     }
     
+    // 3.5. CHECK FOR SUPPORT REQUEST
+    const supportKeywords = ['support', 'help me', 'talk to agent', 'sales team', 'contact support', 'human support']
+    const isSupportRequest = supportKeywords.some(keyword => message.toLowerCase().includes(keyword))
+    
+    if (isSupportRequest) {
+      const supportResponse = `Connecting you to our support team...\n\n` +
+        `Please wait while we connect you to our sales team for personalized assistance with your yacht booking.\n\n` +
+        `Our team will help you with:\n` +
+        `- Detailed yacht information\n` +
+        `- Customized booking packages\n` +
+        `- Special requests and amenities\n` +
+        `- Pricing and availability\n\n` +
+        `Support Contact:\n` +
+        `Email: support@yachtservices.com\n` +
+        `Phone: +1 (555) 123-4567\n` +
+        `Hours: 9 AM - 6 PM (Mon-Sat)\n\n` +
+        `In the meantime, I can still assist you with any questions about our yachts!`
+      
+      return Response.json({
+        response: supportResponse,
+        type: "support"
+      })
+    }
+    
     // 4. CHECK IF QUERY IS YACHT-RELATED (Skip check if there's active conversation context)
     const isShortResponse = message.trim().split(/\s+/).length <= 3 // 3 words or less
     const isNumericResponse = /^\d+$/.test(message.trim()) // Just a number
@@ -592,6 +616,7 @@ CRITICAL INSTRUCTIONS:
 - Guide users through the booking process
 - NEVER generate fake payment links or URLs
 - Payment will be handled automatically by a secure payment button
+- If user needs additional help, suggest they type "support" to connect with our sales team
 
 SLIDING WINDOW CONTEXT PRIORITY:
 - The conversation history includes [RECENT] and [OLDER] labels
@@ -803,8 +828,6 @@ if (userAuthenticated && user && updatedContext.bookingIntent && (updatedContext
 
 // IMPORTANT: Only reached if payment processing was NOT triggered
 return Response.json({ response: text, type: "ai" })
-
-// ... (rest of the catch blocks below)
 
 return Response.json({ response: text, type: "ai" })
 

@@ -21,14 +21,32 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error fetching profile:', error)
       return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
+        { error: 'Failed to fetch profile', details: error.message },
+        { status: 500 }
       )
+    }
+
+    // If profile doesn't exist, return user info with null profile
+    if (!profile) {
+      return NextResponse.json({ 
+        profile: {
+          id: user.id,
+          email: user.email,
+          full_name: null,
+          phone: null,
+          address: null,
+          city: null,
+          state: null,
+          zip_code: null,
+          country: null
+        },
+        profileExists: false
+      })
     }
 
     // ✅ Add Supabase auth user ID and email to the response
@@ -38,7 +56,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
     }
 
-    return NextResponse.json({ profile: enrichedProfile })
+    return NextResponse.json({ profile: enrichedProfile, profileExists: true })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json(
@@ -88,7 +106,7 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .select('id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const profileData = {
       id: user.id,
