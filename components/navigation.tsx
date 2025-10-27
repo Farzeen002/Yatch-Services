@@ -1,110 +1,138 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Anchor, Menu, X } from "lucide-react"
-import { useEffect, useState } from "react"
-import { createClient } from "@/utils/supabase/client"
-import { Menu as HeadlessMenu } from "@headlessui/react"
-import LoginPopup from "./LoginPopup"
-import ProfileModal from "./ProfileModal"
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Anchor, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { Menu as HeadlessMenu } from "@headlessui/react";
+import LoginPopup from "./LoginPopup";
+import ProfileModal from "./ProfileModal";
 
 export default function Navigation() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
+  const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [loginPopupOpen, setLoginPopupOpen] = useState(false)
-  const [showLoginLink, setShowLoginLink] = useState(false)
-  const [user, setUser] = useState<{ name: string; image: string; role: string } | null>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [loginPopupOpen, setLoginPopupOpen] = useState(false);
+  const [showLoginLink, setShowLoginLink] = useState(false);
+  const [user, setUser] = useState<{ name: string; image: string; role: string } | null>(null);
+  const [userLoaded, setUserLoaded] = useState(false);
 
-  const links = [
+  const allLinks = [
     { href: "/", label: "Home" },
-    { href: "/admin", label: "Dashboard" },
     { href: "/yachts", label: "Yachts" },
-    { href: "/bookings", label: "Bookings" },
-    { href: "/invoices", label: "Invoices" },
-    { href: "/Staff", label: "Staff" },
-    { href: "/user", label: "My Bookings" },
-  ]
+    { href: "/admin", label: "Dashboard", role: "admin" },
+    { href: "/bookings", label: "Bookings", role: "admin" },
+    { href: "/invoices", label: "Invoices", role: "admin" },
+    { href: "/Staff", label: "Staff", role: "admin" },
+    { href: "/user", label: "My Bookings", role: "user" },
+  ];
 
-  // Fetch user profile
- useEffect(() => {
-  const fetchUser = async () => {
-    const { data: authData, error: authError } = await supabase.auth.getUser()
-    if (authError || !authData.user) return
+  // ✅ Show base menu immediately
+  const [visibleLinks, setVisibleLinks] = useState(
+    allLinks.filter((l) => !l.role) // show public first
+  );
 
-    const user = authData.user
-
-    const { data: profile, error: profileError } = await supabase
-      .from("users")
-      .select("username, profile_image, role_type")
-      .eq("id", user.id)
-      .single()
-
-    if (profileError) return
-
-    // ✅ Choose the best image source available
-    const finalImage =
-      profile?.profile_image && profile.profile_image.trim() !== ""
-        ? profile.profile_image
-        : user.user_metadata?.avatar_url ||
-          user.user_metadata?.picture ||
-          "/profile-placeholder.png"
-
-    setUser({
-      name:
-        profile?.username ||
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        "User",
-      image: finalImage,
-      role: profile?.role_type || "user",
-    })
-  }
-
-  fetchUser()
-}, [supabase])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
-  }
-
-  const visibleLinks = links.filter((link) => {
-    if (
-      (link.href === "/admin" ||
-        link.href === "/bookings" ||
-        link.href === "/invoices" ||
-        link.href === "/Staff") &&
-      user?.role !== "admin"
-    ) return false
-    if (link.href === "/user" && user?.role !== "user") return false
-    return true
-  })
-
-  // Show login popup once per session
+  // ✅ Fetch user in background (non-blocking)
   useEffect(() => {
-    const labels = visibleLinks.map((link) => link.label)
-    const onlyHomeAndYachts = labels.length === 2 && labels.includes("Home") && labels.includes("Yachts")
-    const popupShown = sessionStorage.getItem("loginPopupShown")
+    let cancelled = false;
 
-    if (onlyHomeAndYachts && !user && !popupShown) {
-      const timer = setTimeout(() => {
-        setLoginPopupOpen(true)
-        sessionStorage.setItem("loginPopupShown", "true")
-      }, 3000)
-      return () => clearTimeout(timer)
+    async function fetchUser() {
+      try {
+        const [{ data: authData }, { data: profile }] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase.from("users").select("id, username, profile_image, role_type"),
+        ]);
+
+        if (!authData?.user) {
+          if (!cancelled) {
+            setUser(null);
+            setUserLoaded(true);
+          }
+          return;
+        }
+
+        const userData = authData.user;
+        const userProfile = profile?.find((p) => p.id === userData.id);
+        const finalImage =
+          userProfile?.profile_image?.trim() ||
+          userData.user_metadata?.avatar_url ||
+          "/profile-placeholder.png";
+
+        if (!cancelled) {
+          setUser({
+            name:
+              userProfile?.username ||
+              userData.user_metadata?.full_name ||
+              userData.email?.split("@")[0] ||
+              "User",
+            image: finalImage,
+            role: userProfile?.role_type || "user",
+          });
+          setUserLoaded(true);
+        }
+      } catch {
+        if (!cancelled) setUserLoaded(true);
+      }
     }
-  }, [visibleLinks, user])
+
+    fetchUser();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ✅ Update visible links after user loads (fast switch)
+  useEffect(() => {
+    if (!userLoaded) return;
+
+    const filtered = allLinks.filter((link) => {
+      if (!link.role) return true;
+      if (link.role === "admin" && user?.role === "admin") return true;
+      if (link.role === "user" && user?.role === "user") return true;
+      return false;
+    });
+
+    setVisibleLinks(filtered);
+  }, [user, userLoaded]);
+
+  // ✅ Popup logic (3s delay only for guests)
+  useEffect(() => {
+    if (!userLoaded) return;
+
+    const labels = visibleLinks.map((l) => l.label);
+    const onlyPublic = labels.length === 2 && labels.includes("Home") && labels.includes("Yachts");
+    const popupShown = sessionStorage.getItem("loginPopupShown");
+
+    if (onlyPublic && !user && !popupShown) {
+      const timer = setTimeout(() => {
+        setLoginPopupOpen(true);
+        sessionStorage.setItem("loginPopupShown", "true");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
+    if (onlyPublic && !user && popupShown) {
+      setShowLoginLink(true);
+    }
+  }, [userLoaded, user, visibleLinks]);
 
   const handleLoginCancel = () => {
-    setLoginPopupOpen(false)
-    setShowLoginLink(true)
-  }
+    setLoginPopupOpen(false);
+    setShowLoginLink(true);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setVisibleLinks(allLinks.filter((l) => !l.role)); // revert to base
+    sessionStorage.removeItem("loginPopupShown");
+    setShowLoginLink(true);
+    router.push("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b border-border">
@@ -123,7 +151,11 @@ export default function Navigation() {
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href === "/yachts" && user?.role === "admin" ? "/admin/yachts" : link.href}
+                href={
+                  link.href === "/yachts" && user?.role === "admin"
+                    ? "/admin/yachts"
+                    : link.href
+                }
                 className={`text-sm font-medium transition-colors ${
                   pathname === link.href
                     ? "text-primary border-b-2 border-primary pb-1"
@@ -143,7 +175,11 @@ export default function Navigation() {
             {user && (
               <HeadlessMenu as="div" className="relative">
                 <HeadlessMenu.Button className="flex items-center gap-2 focus:outline-none">
-                  <img src={user.image} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                  <img
+                    src={user.image}
+                    alt="Profile"
+                    className="w-9 h-9 rounded-full object-cover"
+                  />
                   <span className="font-medium text-sm">{user.name}</span>
                 </HeadlessMenu.Button>
 
@@ -152,7 +188,9 @@ export default function Navigation() {
                     {({ active }) => (
                       <button
                         onClick={() => setProfileOpen(true)}
-                        className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                        className={`w-full text-left px-4 py-2 text-sm ${
+                          active ? "bg-gray-100" : ""
+                        }`}
                       >
                         Profile
                       </button>
@@ -162,7 +200,9 @@ export default function Navigation() {
                     {({ active }) => (
                       <button
                         onClick={handleLogout}
-                        className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                        className={`w-full text-left px-4 py-2 text-sm ${
+                          active ? "bg-gray-100" : ""
+                        }`}
                       >
                         Logout
                       </button>
@@ -174,7 +214,11 @@ export default function Navigation() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+          <button
+            className="md:hidden p-2"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -185,9 +229,15 @@ export default function Navigation() {
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href === "/yachts" && user?.role === "admin" ? "/admin/yachts" : link.href}
+                href={
+                  link.href === "/yachts" && user?.role === "admin"
+                    ? "/admin/yachts"
+                    : link.href
+                }
                 className={`block px-4 py-2 rounded text-sm font-medium ${
-                  pathname === link.href ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
+                  pathname === link.href
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -206,14 +256,17 @@ export default function Navigation() {
 
             {user && (
               <div className="border-t pt-3 mt-3 px-4 flex flex-col gap-1">
-                <button onClick={() => setProfileOpen(true)} className="text-left text-sm py-1 hover:underline">
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  className="text-left text-sm py-1 hover:underline"
+                >
                   Profile
                 </button>
                 {user.role === "admin" && (
                   <button
                     onClick={() => {
-                      router.push("/admin")
-                      setIsOpen(false)
+                      router.push("/admin");
+                      setIsOpen(false);
                     }}
                     className="text-left text-sm py-1 hover:underline"
                   >
@@ -222,8 +275,8 @@ export default function Navigation() {
                 )}
                 <button
                   onClick={() => {
-                    handleLogout()
-                    setIsOpen(false)
+                    handleLogout();
+                    setIsOpen(false);
                   }}
                   className="text-left text-sm py-1 text-red-600 hover:underline"
                 >
@@ -239,5 +292,5 @@ export default function Navigation() {
       <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
       <LoginPopup open={loginPopupOpen} onClose={handleLoginCancel} />
     </nav>
-  )
+  );
 }
