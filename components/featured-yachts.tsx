@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, Users, Anchor, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { createSlug } from "@/lib/slug-utils";
 
 interface Yacht {
   id: string;
@@ -83,7 +84,7 @@ export default function FeaturedYachts() {
               >
                 <Card 
                   className="overflow-hidden hover:shadow-luxury transition-all duration-300 h-full flex flex-col group cursor-pointer border-2 hover:border-accent/50"
-                  onClick={() => router.push(`/yachts/${yacht.id}`)}
+                  onClick={() => router.push(`/yachts/${createSlug(yacht.name)}`)}
                 >
                   <div className="relative h-64 overflow-hidden">
                     <img 
@@ -137,7 +138,7 @@ export default function FeaturedYachts() {
                         className="px-6 py-3 gradient-gold rounded-lg font-bold hover:shadow-glow transition-all transform hover:scale-105"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/yachts/${yacht.id}`);
+                          router.push(`/yachts/${createSlug(yacht.name)}`);
                         }}
                       >
                         Book Now
