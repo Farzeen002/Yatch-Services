@@ -187,10 +187,16 @@ export default function BookingsManagement() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Booking Info */}
-                    <div className="flex-1">
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="flex flex-col md:flex-row">
+                    {/* Yacht Image */}
+                    <div className="bg-linear-to-br from-primary to-blue-900 p-8 flex items-center justify-center w-full md:w-48 h-48">
+                      <span className="text-6xl">{booking.image}</span>
+                    </div>
+
+                    {/* Booking Details */}
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
                         <div className="flex items-start justify-between mb-4">
                           <div>
                           <h3 className="text-xl font-bold text-foreground mb-1">
