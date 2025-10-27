@@ -286,7 +286,7 @@ export default function YachtDetailPage() {
             </Card>
 
             {/* Features */}
-            <Card className="p-6">
+            {/* <Card className="p-6">
               <h3 className="text-xl font-bold text-foreground mb-4">Special Features</h3>
               <div className="grid grid-cols-2 gap-3">
                 {yacht.features.map((feature, index) => (
@@ -296,7 +296,7 @@ export default function YachtDetailPage() {
                   </div>
                 ))}
               </div>
-            </Card>
+            </Card> */}
 
             {/* Specifications */}
             <Card className="p-6">
