@@ -21,7 +21,7 @@ export default function YachtsCatalog() {
   const [showCalendar, setShowCalendar] = useState(false)
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end: Date | null; isMultiDay: boolean } | null>(null)
   const [filters, setFilters] = useState({
-    priceRange: [1000, 10000],
+    priceRange: [0, 10000],
     guests: 1,
     length: [20, 80],
     amenities: [] as string[]
@@ -202,7 +202,7 @@ export default function YachtsCatalog() {
                       <Slider
                         value={filters.priceRange}
                         onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
-                        min={1000}
+                        min={0}
                         max={10000}
                         step={500}
                         className="w-full"

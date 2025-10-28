@@ -78,8 +78,14 @@ export default function UserBookings() {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)
 
-  const getBookingDuration = (start: string, end: string) =>
-    Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
+ const getBookingDuration = (start: string, end: string) => {
+  const diffDays =
+    Math.floor(
+      (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1
+  return Math.max(1, diffDays)
+}
+
 
   const getStatusBadge = (status: string) => {
     const map = {

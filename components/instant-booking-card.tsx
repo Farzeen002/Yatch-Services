@@ -100,21 +100,32 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
     return start >= today && end > start
   }
 
-  const calculateTotalPrice = () => {
-    if (!selectedDates) return yacht.price * guests
-    if (selectedDates.isMultiDay && selectedDates.end) {
-      const nights = Math.max(1, Math.ceil((selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24)))
-      const basePrice = yacht.price * guests * nights
-      return nights >= 3 ? basePrice * 0.9 : basePrice
-    }
-    return yacht.price * guests
+ const calculateTotalPrice = () => {
+  if (!selectedDates) return yacht.price * guests
+
+  if (selectedDates.isMultiDay && selectedDates.end) {
+    const days = Math.floor(
+      (selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1
+
+    const basePrice = yacht.price * guests * days
+    return days >= 3 ? basePrice * 0.9 : basePrice // keep same discount logic
   }
 
+  return yacht.price * guests
+}
+
+
   const getBookingDuration = () => {
-    if (!selectedDates) return 1
-    if (!selectedDates.isMultiDay || !selectedDates.end) return 1
-    return Math.max(1, Math.ceil((selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24)))
-  }
+  if (!selectedDates) return 1
+  if (!selectedDates.isMultiDay || !selectedDates.end) return 1
+
+  // ✅ Include both start and end dates → days count
+  const diffDays = Math.floor(
+    (selectedDates.end.getTime() - selectedDates.start.getTime()) / (1000 * 60 * 60 * 24)
+  ) + 1
+  return Math.max(1, diffDays)
+}
 
   const loadRazorpayScript = (): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -233,18 +244,18 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
 
     try {
       // ✅ FIX 1: Handle null adjustedEndDate properly
-      let adjustedEndDate: Date
-      if (!selectedDates.end || selectedDates.start.getTime() === selectedDates.end.getTime()) {
-        adjustedEndDate = new Date(selectedDates.start)
-        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1)
-      } else {
-        adjustedEndDate = selectedDates.end
-      }
+      // ✅ FIX: For single-day bookings, endDate = startDate
+let adjustedEndDate: Date
+if (!selectedDates.end) {
+  adjustedEndDate = selectedDates.start
+} else {
+  adjustedEndDate = selectedDates.end
+}
 
       const bookingData = {
         yachtId: yacht.id,
-        startDate: selectedDates.start.toISOString().split("T")[0],
-        endDate: adjustedEndDate.toISOString().split("T")[0],
+        startDate: selectedDates.start.toLocaleDateString("en-CA"),
+        endDate: adjustedEndDate.toLocaleDateString("en-CA"),
         guests
       }
 
@@ -277,7 +288,7 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
         paymentId: paymentResult.paymentId
       })
       setShowConfirmation(true)
-      setTimeout(() => router.push("/user/bookings"), 3000)
+      setTimeout(() => router.push("/user"), 3000)
     } catch (error: any) {
       console.error("Booking error:", error)
       toast({

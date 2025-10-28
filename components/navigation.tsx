@@ -29,6 +29,7 @@ export default function Navigation() {
     { href: "/invoices", label: "Invoices", role: "admin" },
     { href: "/Staff", label: "Staff", role: "admin" },
     { href: "/user", label: "My Bookings", role: "user" },
+    { href: "/support", label: "Customer Support", role: "user" },
   ];
 
   // ✅ Show base menu immediately

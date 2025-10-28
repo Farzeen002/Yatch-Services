@@ -153,11 +153,15 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button
-                    onClick={() => setActiveTab("yachts")}
+                    onClick={() => {
+                      setActiveTab("yachts")
+                      setShowYachtForm(true)
+                    }}
                     className="w-full bg-gray-800 text-white hover:bg-gray-900"
                   >
                     <Plus className="h-4 w-4 mr-2" /> Add New Yacht
                   </Button>
+
                   <Button
                     onClick={() => router.push("/bookings")}
                     variant="outline"
