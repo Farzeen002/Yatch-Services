@@ -4,18 +4,26 @@ export async function POST(request: NextRequest) {
   try {
     const { text, from } = await request.json();
 
+    // Validate input
+    if (!text || typeof text !== 'string') {
+      return NextResponse.json(
+        { error: 'Text is required for translation' },
+        { status: 400 }
+      );
+    }
+
     const key = process.env.AZURE_TRANSLATOR_KEY;
     const region = process.env.AZURE_TRANSLATOR_REGION;
     const endpoint = 'https://api.cognitive.microsofttranslator.com';
 
     if (!key || !region) {
       return NextResponse.json(
-        { error: 'Azure credentials not configured' },
+        { error: 'Azure Translator credentials not configured' },
         { status: 500 }
       );
     }
 
-    // Always translate to Arabic
+    // Only translate to Arabic - this is specifically for Arabic chatbot translations
     const url = `${endpoint}/translate?api-version=3.0&to=ar${from ? `&from=${from}` : ''}`;
 
     const response = await fetch(url, {
@@ -30,9 +38,9 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Azure API error:', errorData);
+      console.error('Azure Translator API error:', errorData);
       return NextResponse.json(
-        { error: 'Translation failed' },
+        { error: 'Arabic translation failed' },
         { status: response.status }
       );
     }
@@ -42,11 +50,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       translatedText: data[0].translations[0].text,
       detectedLanguage: data[0].detectedLanguage?.language,
+      targetLanguage: 'ar',
+      sourceText: text,
     });
   } catch (error) {
-    console.error('Translation error:', error);
+    console.error('Arabic translation error:', error);
     return NextResponse.json(
-      { error: 'Translation failed' },
+      { error: 'Arabic translation service unavailable' },
       { status: 500 }
     );
   }

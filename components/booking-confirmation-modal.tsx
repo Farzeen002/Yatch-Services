@@ -16,6 +16,7 @@ interface BookingConfirmationModalProps {
     endDate: Date | null
     guests: number
     bookingId: string
+    paymentId?: string
   }
 }
 
@@ -73,9 +74,18 @@ export default function BookingConfirmationModal({
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Booking ID</span>
                 <Badge variant="secondary" className="font-mono">
-                  #{bookingDetails.bookingId}
+                  {bookingDetails.bookingId.substring(0, 8)}...
                 </Badge>
               </div>
+              
+              {bookingDetails.paymentId && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Payment ID</span>
+                  <Badge variant="secondary" className="font-mono">
+                    {bookingDetails.paymentId}
+                  </Badge>
+                </div>
+              )}
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Dates</span>
