@@ -2,11 +2,20 @@ import Razorpay from 'razorpay'
 import { createAdminClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+// Lazy initialization of Razorpay (only when needed)
+function getRazorpayInstance() {
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+  const keySecret = process.env.RAZORPAY_KEY_SECRET
+  
+  if (!keyId || !keySecret) {
+    throw new Error('Razorpay credentials are not configured. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your environment.')
+  }
+  
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  })
+}
 
 // Helper function to generate short receipt ID (max 40 chars)
 function generateReceiptId(bookingId: string): string {
@@ -24,6 +33,14 @@ export async function POST(request: Request) {
       return Response.json(
         { error: 'Missing required fields' },
         { status: 400 }
+      )
+    }
+    
+    // Check if Razorpay is configured
+    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return Response.json(
+        { error: 'Payment system not configured. Please contact support.' },
+        { status: 503 }
       )
     }
 
@@ -80,6 +97,9 @@ export async function POST(request: Request) {
     }
 
     console.log('Creating Razorpay order with receipt:', receiptId)
+    
+    // Get Razorpay instance (lazy initialization)
+    const razorpay = getRazorpayInstance()
     const order = await razorpay.orders.create(orderOptions)
 
     // Update booking with order ID
