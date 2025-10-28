@@ -318,6 +318,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Users, DollarSign, Clock, CheckCircle, XCircle, Eye, Download, User, MapPin } from "lucide-react"
+import { createSlug } from "@/lib/slug-utils"
 
 interface UserBooking {
   id: string
@@ -555,7 +556,7 @@ export default function UserBookings() {
                         <Button variant="outline" size="sm" onClick={() => downloadBookingPDF(b)}>
                           <Download className="h-4 w-4 mr-2" /> PDF
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => (window.location.href = `/yachts/${b.yacht_id}`)}>
+                        <Button variant="outline" size="sm" onClick={() => (window.location.href = `/yachts/${createSlug(b.yacht_name)}`)}>
                           <Eye className="h-4 w-4 mr-2" /> View Yacht
                         </Button>
                       </div>

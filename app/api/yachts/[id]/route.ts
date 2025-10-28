@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/utils/supabase/server"
+import { createSlug } from "@/lib/slug-utils"
 
-// GET /api/yachts/[id] - Fetch a specific yacht
+// Helper to check if string is a UUID
+function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
+// GET /api/yachts/[id] - Fetch a specific yacht (supports both UUID and slug)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } | Promise<{ id: string }> }
@@ -9,15 +16,39 @@ export async function GET(
   try {
     const supabase = await createServerSupabaseClient()
     const resolvedParams = await params
-    const yachtId = resolvedParams.id
+    const identifier = resolvedParams.id
 
-    const { data: yacht, error } = await supabase
-      .from("yachts")
-      .select("*")
-      .eq("id", yachtId)
-      .single()
+    let yacht
+    let error
 
-    if (error) {
+    // Check if identifier is a UUID or a slug
+    if (isUUID(identifier)) {
+      // Query by ID
+      const result = await supabase
+        .from("yachts")
+        .select("*")
+        .eq("id", identifier)
+        .single()
+      yacht = result.data
+      error = result.error
+    } else {
+      // Query by slug - get all yachts and match by slug
+      const result = await supabase
+        .from("yachts")
+        .select("*")
+      
+      if (result.error) {
+        error = result.error
+      } else {
+        // Find yacht that matches the slug
+        yacht = result.data?.find(y => createSlug(y.name) === identifier.toLowerCase())
+        if (!yacht) {
+          error = { message: "Yacht not found" }
+        }
+      }
+    }
+
+    if (error || !yacht) {
       console.error("Error fetching yacht:", error)
       return NextResponse.json({ error: "Yacht not found" }, { status: 404 })
     }

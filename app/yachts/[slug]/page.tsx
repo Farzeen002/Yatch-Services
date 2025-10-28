@@ -58,12 +58,12 @@ export default function YachtDetailPage() {
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end: Date | null; isMultiDay: boolean } | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Fetch yacht data from API
+  // Fetch yacht data from API using slug
   useEffect(() => {
     const fetchYacht = async () => {
       try {
-        const yachtId = params.id as string
-        const response = await fetch(`/api/yachts/${yachtId}`)
+        const slug = params.slug as string
+        const response = await fetch(`/api/yachts/${slug}`)
         const data = await response.json()
 
         if (!response.ok) {
@@ -114,7 +114,7 @@ export default function YachtDetailPage() {
     };
 
     fetchYacht();
-  }, [params.id])
+  }, [params.slug])
 
   const handleDateSelect = (dates: { start: Date; end: Date | null; isMultiDay: boolean }) => {
     setSelectedDates(dates)
@@ -414,3 +414,4 @@ export default function YachtDetailPage() {
     </main>
   )
 }
+

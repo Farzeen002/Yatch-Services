@@ -13,6 +13,7 @@ import { Star, MapPin, Users, Anchor, Filter, Calendar, X } from "lucide-react"
 import BookingCalendar from "./booking-calendar"
 import YachtImageGallery from "./yacht-image-gallery"
 import { checkYachtAvailability, type YachtAvailability } from "@/lib/availability"
+import { createSlug } from "@/lib/slug-utils"
 
 export default function YachtsCatalog() {
   const [selectedType, setSelectedType] = useState("all")
@@ -305,7 +306,7 @@ export default function YachtsCatalog() {
             >
               <Card
                 className="overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 h-full flex flex-col cursor-pointer group"
-                onClick={() => router.push(`/yachts/${yacht.id}`)}
+                onClick={() => router.push(`/yachts/${createSlug(yacht.name)}`)}
               >
                 <div className="relative h-48 overflow-hidden">
                   <YachtImageGallery
@@ -334,7 +335,7 @@ export default function YachtsCatalog() {
                       className="bg-white/90 text-black hover:bg-white backdrop-blur-sm"
                       onClick={(e) => {
                         e.stopPropagation()
-                        router.push(`/yachts/${yacht.id}`)
+                        router.push(`/yachts/${createSlug(yacht.name)}`)
                       }}
                     >
                       Quick View
@@ -383,7 +384,7 @@ export default function YachtsCatalog() {
                       className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
                       onClick={(e) => {
                         e.stopPropagation()
-                        router.push(`/yachts/${yacht.id}`)
+                        router.push(`/yachts/${createSlug(yacht.name)}`)
                       }}
                     >
                       View Details

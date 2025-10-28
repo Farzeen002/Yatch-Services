@@ -17,11 +17,24 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
+    
+    // Check if Razorpay secret is configured
+    const razorpaySecret = process.env.RAZORPAY_KEY_SECRET
+    if (!razorpaySecret) {
+      console.error('RAZORPAY_KEY_SECRET not configured')
+      return Response.json(
+        { 
+          success: false,
+          error: 'Payment system not configured. Please contact support.' 
+        },
+        { status: 503 }
+      )
+    }
 
     // Verify Razorpay signature
     const body = razorpay_order_id + "|" + razorpay_payment_id
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .createHmac("sha256", razorpaySecret)
       .update(body.toString())
       .digest("hex")
 

@@ -502,13 +502,12 @@ export async function GET(request: Request) {
       )
     }
     
-    // Get user bookings
+    // Get user bookings (removed payments join as table doesn't exist)
     const { data: bookings, error } = await supabase
       .from('bookings')
       .select(`
         *,
-        yachts(name, type, location, images),
-        payments(status, amount, created_at)
+        yachts(name, type, location, images)
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
