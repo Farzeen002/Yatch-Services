@@ -87,6 +87,8 @@ export interface GraphOutput {
     yacht?: any
     bookingDetails?: any
     dynamicLink?: string
+    searchedName?: string
+    notFound?: boolean
   }
   nextAction?: 'await_input' | 'redirect' | 'complete'
 }
