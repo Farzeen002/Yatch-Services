@@ -91,7 +91,7 @@ export default function AutomationHighlights() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
-          className="mt-12 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl p-8 border border-accent/20"
+          className="mt-12 bg-linear-to-r from-primary/5 to-accent/5 rounded-xl p-8 border border-accent/20"
         >
           <h3 className="text-2xl font-bold text-primary mb-4">Future Add-ons</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
