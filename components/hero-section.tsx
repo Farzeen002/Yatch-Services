@@ -24,9 +24,12 @@ export default function HeroSection() {
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <Image 
-          src={heroYacht} 
-          alt="Luxury yacht at sunset" 
+        <video
+          src="/assets/yacht-3.mp4" // 🎥 place your video in public/assets/
+          autoPlay
+          loop
+          muted
+          playsInline
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary/90" />
