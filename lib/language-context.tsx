@@ -21,7 +21,7 @@ const translations: Record<string, { en: string; ar: string }> = {
   "nav.admin": { en: "Admin", ar: "الإدارة" },
   
   // Hero Section
-  "hero.title": { en: "Book Your Private Yacht in Seconds", ar: "احجز يختك الخاص في ثوانٍ" },
+  "hero.title": { en: "Book Your Private Yacht in Minutes", ar: "احجز يختك الخاص في ثوانٍ" },
   "hero.subtitle": { en: "Experience luxury yacht booking powered by AI. Marina makes it effortless.", ar: "استمتع بحجز اليخوت الفاخرة بتقنية الذكاء الاصطناعي. مارينا تجعل الأمر سهلاً" },
   "hero.bookNow": { en: "Book Now", ar: "احجز الآن" },
   "hero.chatWithMarina": { en: "Chat with Marina", ar: "تحدث مع مارينا" },

@@ -5,6 +5,7 @@ import FeaturedYachts from "@/components/featured-yachts"
 import Footer from "@/components/footer"
 import Features from "@/components/Features"
 import Testimonials from "@/components/Testimonials"
+import { Pitch } from "@/components/pitch"
 
 
 export default function Home() {
@@ -12,8 +13,9 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <Navigation />
       <HeroSection />
-      <FeaturedYachts />
+      <Pitch />
          <Features />
+      <FeaturedYachts />
          <Testimonials />
       < Footer/>
       </main>
