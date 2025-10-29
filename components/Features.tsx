@@ -13,58 +13,56 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/language-context";
 
 export default function ServicesWithVideoBackground() {
+  const { t } = useLanguage();
+  const router = useRouter();
+  
   const services = [
     {
       icon: Zap,
-      title: "AI-Powered Booking",
-      description:
-        "Instant yacht bookings with intelligent recommendations powered by advanced AI technology.",
+      titleKey: "services.aiBooking",
+      descKey: "services.aiBookingDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
     {
       icon: Calendar,
-      title: "Smart Scheduling",
-      description:
-        "Automated calendar management and booking optimization to maximize your yacht utilization.",
+      titleKey: "services.smartSchedule",
+      descKey: "services.smartScheduleDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
     {
       icon: Shield,
-      title: "Secure Payments",
-      description:
-        "Bank-level security with instant payment processing and automated invoicing system.",
+      titleKey: "services.securePayment",
+      descKey: "services.securePaymentDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
     {
       icon: Users,
-      title: "Staff Management",
-      description:
-        "Comprehensive crew scheduling, certification tracking, and performance management.",
+      titleKey: "services.staffManagement",
+      descKey: "services.staffManagementDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
     {
       icon: TrendingUp,
-      title: "Analytics Dashboard",
-      description:
-        "Real-time insights and detailed reports to grow your yacht charter business.",
+      titleKey: "services.analytics",
+      descKey: "services.analyticsDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
     {
       icon: Globe,
-      title: "Multi-Location Support",
-      description:
-        "Manage multiple marinas and destinations from a single powerful platform.",
+      titleKey: "services.multiLocation",
+      descKey: "services.multiLocationDesc",
       color: "from-blue-500/20 to-cyan-500/20",
     },
   ];
-const router = useRouter();
+  
   const benefits = [
-    { icon: Sparkles, text: "50% Faster Booking Process" },
-    { icon: TrendingUp, text: "35% Revenue Increase" },
-    { icon: HeartHandshake, text: "98% Customer Satisfaction" },
-    { icon: Shield, text: "Enterprise-Grade Security" },
+    { icon: Sparkles, textKey: "benefits.fasterBooking" },
+    { icon: TrendingUp, textKey: "benefits.revenue" },
+    { icon: HeartHandshake, textKey: "benefits.satisfaction" },
+    { icon: Shield, textKey: "benefits.security" },
   ];
 
   return (
@@ -99,18 +97,15 @@ const router = useRouter();
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-6 border border-white/20">
             <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm font-medium">Why Choose Marina</span>
+            <span className="text-sm font-medium">{t("services.title")}</span>
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Everything You Need to Run a{" "}
-            <span className="text-yellow-400">Successful Yacht Business</span>
+            {t("services.title")}
           </h2>
 
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto text-balance">
-            From instant AI bookings to comprehensive staff management, Marina
-            provides all the tools you need to scale your yacht charter business
-            efficiently.
+            {t("services.subtitle")}
           </p>
         </motion.div>
 
@@ -133,9 +128,9 @@ const router = useRouter();
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
                     <service.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-white">{service.title}</h3>
+                  <h3 className="text-2xl font-bold mb-3 text-white">{t(service.titleKey)}</h3>
                   <p className="text-white/80 leading-relaxed">
-                    {service.description}
+                    {t(service.descKey)}
                   </p>
                 </div>
               </Card>
@@ -164,7 +159,7 @@ const router = useRouter();
                 <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center mb-3">
                   <benefit.icon className="w-6 h-6 text-yellow-400" />
                 </div>
-                <p className="font-semibold">{benefit.text}</p>
+                <p className="font-semibold">{t(benefit.textKey)}</p>
               </motion.div>
             ))}
           </div>

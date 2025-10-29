@@ -5,6 +5,7 @@ import { Star, Users, Anchor, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createSlug } from "@/lib/slug-utils";
+import { useLanguage } from "@/lib/language-context";
 
 interface Yacht {
   id: string;
@@ -22,6 +23,7 @@ interface Yacht {
 
 export default function FeaturedYachts() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [yachts, setYachts] = useState<Yacht[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,12 +61,12 @@ export default function FeaturedYachts() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <Badge className="mb-4 gradient-gold border-0">Featured Collection</Badge>
+          <Badge className="mb-4 gradient-gold border-0">{t("featured.badge")}</Badge>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 text-balance">
-            Premium Yachts
+            {t("featured.title")}
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
-            Handpicked collection of the world's finest yachts, ready for your next luxury adventure
+            {t("featured.subtitle")}
           </p>
         </motion.div>
 

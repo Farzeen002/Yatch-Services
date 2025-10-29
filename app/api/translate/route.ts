@@ -1,63 +1,78 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, from } = await request.json();
+    const { text, targetLanguage } = await request.json()
 
-    // Validate input
-    if (!text || typeof text !== 'string') {
+    if (!text || !targetLanguage) {
       return NextResponse.json(
-        { error: 'Text is required for translation' },
+        { error: 'Text and target language are required' },
         { status: 400 }
-      );
+      )
     }
 
-    const key = process.env.AZURE_TRANSLATOR_KEY;
-    const region = process.env.AZURE_TRANSLATOR_REGION;
-    const endpoint = 'https://api.cognitive.microsofttranslator.com';
+    const key = process.env.AZURE_TRANSLATOR_KEY
+    const region = process.env.AZURE_TRANSLATOR_REGION
+    const endpoint = process.env.AZURE_TRANSLATOR_ENDPOINT
 
-    if (!key || !region) {
+    if (!key || !region || !endpoint) {
+      console.error('Azure Translator credentials not configured')
       return NextResponse.json(
-        { error: 'Azure Translator credentials not configured' },
+        { error: 'Translation service not configured' },
         { status: 500 }
-      );
+      )
     }
 
-    // Only translate to Arabic - this is specifically for Arabic chatbot translations
-    const url = `${endpoint}/translate?api-version=3.0&to=ar${from ? `&from=${from}` : ''}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': key,
-        'Ocp-Apim-Subscription-Region': region,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify([{ text }]),
-    });
+    const response = await fetch(
+      `${endpoint}/translate?api-version=3.0&to=${targetLanguage}`,
+      {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': key,
+          'Ocp-Apim-Subscription-Region': region,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([{ text }]),
+      }
+    )
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Azure Translator API error:', errorData);
+      const error = await response.text()
+      console.error('Azure Translator error:', error)
       return NextResponse.json(
-        { error: 'Arabic translation failed' },
+        { error: 'Translation failed', details: error },
         { status: response.status }
-      );
+      )
     }
 
-    const data = await response.json();
+    const data = await response.json()
+    const translatedText = data[0]?.translations[0]?.text
 
-    return NextResponse.json({
-      translatedText: data[0].translations[0].text,
-      detectedLanguage: data[0].detectedLanguage?.language,
-      targetLanguage: 'ar',
-      sourceText: text,
-    });
+    return NextResponse.json({ 
+      translatedText,
+      detectedLanguage: data[0]?.detectedLanguage?.language 
+    })
   } catch (error) {
-    console.error('Arabic translation error:', error);
+    console.error('Translation error:', error)
     return NextResponse.json(
-      { error: 'Arabic translation service unavailable' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
-    );
+    )
   }
 }
+
+// GET endpoint to check translation service status
+export async function GET() {
+  const configured = !!(
+    process.env.AZURE_TRANSLATOR_KEY &&
+    process.env.AZURE_TRANSLATOR_REGION &&
+    process.env.AZURE_TRANSLATOR_ENDPOINT
+  )
+
+  return NextResponse.json({
+    status: configured ? 'configured' : 'not_configured',
+    service: 'Azure Translator',
+    supportedLanguages: ['en', 'ar']
+  })
+}
+

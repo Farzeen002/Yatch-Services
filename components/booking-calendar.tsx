@@ -220,14 +220,14 @@ export default function BookingCalendar({ onDateSelect, unavailableDates = [], y
         )}
 
         {/* Unavailable Dates Info */}
-        {unavailableDates.length > 0 && (
+        {/* {unavailableDates.length > 0 && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
             <p className="text-sm text-destructive font-medium mb-1">Unavailable Dates</p>
             <p className="text-xs text-destructive/80">
               Some dates are already booked. Please select available dates.
             </p>
           </div>
-        )}
+        )} */}
       </div>
     </Card>
   )

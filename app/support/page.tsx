@@ -14,8 +14,10 @@ import Navigation from "@/components/navigation";
 import { createClient } from "@/utils/supabase/client";
 import EmailSupportDialog from "@/components/EmailSupportDialog";
 import ChatbotWrapper from "@/components/chatbot-wrapper";
+import { useLanguage } from "@/lib/language-context";
 
 export default function Support() {
+  const { t } = useLanguage();
   const [showOptions, setShowOptions] = useState(false);
   const [chatbotOpen, setChatbotOpen] = useState(true); // Auto-open on support page
   const [formData, setFormData] = useState({
@@ -177,8 +179,8 @@ export default function Support() {
                 <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Mail className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">Email Support</h3>
-                <p className="text-muted-foreground mb-6 text-base">Get answers within 24 hours</p>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">{t("support.emailTitle") || "Email Support"}</h3>
+                <p className="text-muted-foreground mb-6 text-base">{t("support.emailDesc") || "Get answers within 24 hours"}</p>
                 <EmailSupportDialog />
               </CardContent>
             </Card>
@@ -189,8 +191,8 @@ export default function Support() {
                 <div className="w-20 h-20 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Phone className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">Call Us</h3>
-                <p className="text-muted-foreground mb-6 text-base">Available 24/7 for emergencies</p>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">{t("support.callTitle") || "Call Us"}</h3>
+                <p className="text-muted-foreground mb-6 text-base">{t("support.callDesc") || "Available 24/7 for emergencies"}</p>
 
                 <div className="flex flex-col items-center space-y-4">
                   <Button
@@ -229,13 +231,13 @@ export default function Support() {
                 <div className="w-20 h-20 gradient-ocean rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <MessageCircle className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-foreground">Live Chat</h3>
-                <p className="text-muted-foreground mb-6 text-base">Instant support from our team</p>
+                <h3 className="text-2xl font-bold mb-3 text-foreground">{t("support.chatTitle") || "Live Chat"}</h3>
+                <p className="text-muted-foreground mb-6 text-base">{t("support.chatDesc") || "Instant support from our team"}</p>
                 <Button 
                   onClick={openChatbot}
                   className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold px-6 py-2 shadow-md"
                 >
-                  Start Chat
+                  {t("support.startChat")}
                 </Button>
               </CardContent>
             </Card>

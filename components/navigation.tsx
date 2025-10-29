@@ -8,11 +8,14 @@ import { createClient } from "@/utils/supabase/client";
 import { Menu as HeadlessMenu } from "@headlessui/react";
 import LoginPopup from "./LoginPopup";
 import ProfileModal from "./ProfileModal";
+import LanguageSwitcher from "./language-switcher";
+import { useLanguage } from "@/lib/language-context";
 
 export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLanguage();
 
   const [isOpen, setIsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -22,14 +25,14 @@ export default function Navigation() {
   const [userLoaded, setUserLoaded] = useState(false);
 
   const allLinks = [
-    { href: "/", label: "Home" },
-    { href: "/yachts", label: "Yachts" },
-    { href: "/support", label: "Customer Support" },
-    { href: "/admin", label: "Dashboard", role: "admin" },
-    { href: "/bookings", label: "Bookings", role: "admin" },
-    { href: "/invoices", label: "Invoices", role: "admin" },
-    { href: "/Staff", label: "Staff", role: "admin" },
-    { href: "/user", label: "My Bookings", role: "user" },
+    { href: "/", label: "Home", translationKey: "nav.home" },
+    { href: "/yachts", label: "Yachts", translationKey: "nav.yachts" },
+    { href: "/support", label: "Customer Support", translationKey: "nav.support" },
+    { href: "/admin", label: "Dashboard", role: "admin", translationKey: "nav.admin" },
+    { href: "/bookings", label: "Bookings", role: "admin", translationKey: "nav.bookings" },
+    { href: "/invoices", label: "Invoices", role: "admin", translationKey: "nav.invoices" },
+    { href: "/Staff", label: "Staff", role: "admin", translationKey: "nav.staff" },
+    { href: "/user", label: "My Bookings", role: "user", translationKey: "nav.myBookings" },
   ];
 
   // ✅ Show base menu immediately (Home, Yachts, Customer Support)
@@ -152,11 +155,11 @@ export default function Navigation() {
             <div className="w-10 h-10 gradient-ocean rounded-xl flex items-center justify-center shadow-luxury">
               <Anchor className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-primary">Marassi Gulf</h1>
+            <h1 className="text-2xl font-bold text-primary">Marassi Gulf Entertainment</h1>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}
@@ -167,13 +170,16 @@ export default function Navigation() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.label}
+                {t(link.translationKey) || link.label}
               </Link>
             ))}
 
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {!user && showLoginLink && (
               <Link href="/login" className="text-sm font-medium text-primary hover:underline">
-                Login
+                {t('nav.login')}
               </Link>
             )}
 
@@ -197,7 +203,7 @@ export default function Navigation() {
                           active ? "bg-gray-100" : ""
                         }`}
                       >
-                        Profile
+                        {t('nav.profile')}
                       </button>
                     )}
                   </HeadlessMenu.Item>
@@ -209,7 +215,7 @@ export default function Navigation() {
                           active ? "bg-gray-100" : ""
                         }`}
                       >
-                        Logout
+                        {t('nav.logout')}
                       </button>
                     )}
                   </HeadlessMenu.Item>
@@ -242,16 +248,21 @@ export default function Navigation() {
                 }`}
                 onClick={() => setIsOpen(false)}
               >
-                {link.label}
+                {t(link.translationKey) || link.label}
               </Link>
             ))}
+
+            {/* Language Switcher - Mobile */}
+            <div className="px-4 py-2">
+              <LanguageSwitcher />
+            </div>
 
             {!user && showLoginLink && (
               <Link
                 href="/login"
                 className="block px-4 py-2 rounded text-sm font-medium text-primary hover:bg-muted"
               >
-                Login
+                {t('nav.login')}
               </Link>
             )}
 
@@ -261,7 +272,7 @@ export default function Navigation() {
                   onClick={() => setProfileOpen(true)}
                   className="text-left text-sm py-1 hover:underline"
                 >
-                  Profile
+                  {t('nav.profile')}
                 </button>
                 {user.role === "admin" && (
                   <button
@@ -271,7 +282,7 @@ export default function Navigation() {
                     }}
                     className="text-left text-sm py-1 hover:underline"
                   >
-                    Dashboard
+                    {t('nav.admin')}
                   </button>
                 )}
                 <button
@@ -281,7 +292,7 @@ export default function Navigation() {
                   }}
                   className="text-left text-sm py-1 text-red-600 hover:underline"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </div>
             )}

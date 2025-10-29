@@ -28,6 +28,13 @@ export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onO
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  const messageIdCounter = useRef(0)
+  
+  // Generate unique message ID
+  const generateMessageId = () => {
+    messageIdCounter.current += 1
+    return Date.now() + messageIdCounter.current
+  }
   
   // Voice features
   const [isRecording, setIsRecording] = useState(false)
@@ -56,7 +63,7 @@ export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onO
   useEffect(() => {
     if (messages.length === 0) {
       addMessage({
-        id: Date.now(),
+        id: generateMessageId(),
         role: 'assistant',
         content: "Hi! I'm Marassi AI, your luxury yacht booking concierge. How can I assist you today?",
         timestamp: new Date(),
@@ -81,7 +88,7 @@ export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onO
     if (!messageText.trim()) return
 
     const userMessage: Message = {
-      id: Date.now(),
+      id: generateMessageId(),
       role: 'user',
       content: messageText,
       timestamp: new Date()
@@ -108,7 +115,7 @@ export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onO
       }
 
       const assistantMessage: Message = {
-        id: Date.now() + 1,
+        id: generateMessageId(),
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
@@ -292,7 +299,7 @@ export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onO
       })
 
       setMessages([{
-        id: Date.now(),
+        id: generateMessageId(),
         role: 'assistant',
         content: "Chat history cleared! How can I help you today?",
         timestamp: new Date(),

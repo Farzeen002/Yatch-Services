@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useLanguage } from "@/lib/language-context"
 
 interface UserBooking {
   id: string
@@ -52,8 +53,10 @@ interface UserProfile {
 }
 
 export default function UserBookings() {
+  const { t, language, translateDynamic } = useLanguage()
   const [bookings, setBookings] = useState<UserBooking[]>([])
   const [filteredBookings, setFilteredBookings] = useState<UserBooking[]>([])
+  const [translatedBookings, setTranslatedBookings] = useState<UserBooking[]>([])
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>("all")

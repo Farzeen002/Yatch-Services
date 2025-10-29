@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { useLanguage } from '@/lib/language-context'
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
@@ -31,8 +33,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to continue</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t("login.title")}</h1>
+          <p className="text-gray-600">{t("login.subtitle")}</p>
         </div>
 
         {error && (
@@ -68,11 +70,11 @@ export default function LoginPage() {
               />
             </svg>
           )}
-          <span>{loading ? 'Signing in...' : 'Continue with Google'}</span>
+          <span>{loading ? t("login.signingIn") : t("login.googleButton")}</span>
         </button>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          {t("login.terms")}
         </p>
       </div>
     </div>

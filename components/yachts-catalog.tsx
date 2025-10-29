@@ -14,8 +14,11 @@ import BookingCalendar from "./booking-calendar"
 import YachtImageGallery from "./yacht-image-gallery"
 import { checkYachtAvailability, type YachtAvailability } from "@/lib/availability"
 import { createSlug } from "@/lib/slug-utils"
+import { useLanguage } from "@/lib/language-context"
+import { translateText } from "@/lib/translate-content"
 
 export default function YachtsCatalog() {
+  const { t, language, translateDynamic } = useLanguage()
   const [selectedType, setSelectedType] = useState("all")
   const [showFilters, setShowFilters] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -27,6 +30,7 @@ export default function YachtsCatalog() {
     amenities: [] as string[]
   })
   const [yachts, setYachts] = useState<any[]>([])
+  const [translatedYachts, setTranslatedYachts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -57,20 +61,42 @@ export default function YachtsCatalog() {
     fetchYachts();
   }, []);
 
-  const yachtAvailabilities: YachtAvailability[] = yachts.map(yacht => ({
+  // Translate yacht data when language changes
+  useEffect(() => {
+    const translateYachts = async () => {
+      if (language === 'en' || yachts.length === 0) {
+        setTranslatedYachts(yachts)
+        return
+      }
+
+      const translated = await Promise.all(
+        yachts.map(async (yacht) => ({
+          ...yacht,
+          name: await translateDynamic(yacht.name),
+          type: await translateDynamic(yacht.type),
+          location: await translateDynamic(yacht.location),
+        }))
+      )
+      setTranslatedYachts(translated)
+    }
+
+    translateYachts()
+  }, [yachts, language]);
+
+  const yachtAvailabilities: YachtAvailability[] = translatedYachts.map(yacht => ({
     yachtId: yacht.id,
     unavailableDates: Array.isArray(yacht.unavailableDates) ? yacht.unavailableDates : [],
     maintenanceDates: Array.isArray(yacht.maintenanceDates) ? yacht.maintenanceDates : []
   }))
 
   const types = ["all", "Superyacht", "Motor Yacht", "Sailing Yacht"]
-  const allAmenities = Array.from(new Set(yachts.flatMap(y => y.amenities)))
+  const allAmenities = Array.from(new Set(translatedYachts.flatMap(y => y.amenities)))
 
   const handleDateSelect = (dates: { start: Date; end: Date | null; isMultiDay: boolean }) => {
     setSelectedDates(dates)
   }
 
-  const filtered = yachts.filter((yacht) => {
+  const filtered = translatedYachts.filter((yacht) => {
     // Type filter
     if (selectedType !== "all" && yacht.type !== selectedType) return false
 
@@ -114,9 +140,9 @@ export default function YachtsCatalog() {
           transition={{ duration: 0.8 }}
           className="mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">Browse Our Fleet</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">{t("yachts.browseAll")}</h1>
           <p className="text-lg text-muted-foreground text-balance">
-            Discover the perfect yacht for your next adventure
+            {t("yachts.subtitle")}
           </p>
         </motion.div>
 
