@@ -44,7 +44,7 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
       addMessage({
         id: Date.now(),
         role: 'assistant',
-        content: "Hi! I'm WhosYEP AI, your luxury yacht booking concierge. How can I assist you today?",
+        content: "Hi! I'm Marina AI, your luxury yacht booking concierge. How can I assist you today?",
         timestamp: new Date(),
         type: 'text'
       })
@@ -460,7 +460,7 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 flex justify-between items-center">
               <div>
-                <h3 className="font-bold text-lg">WhosYEP AI</h3>
+                <h3 className="font-bold text-lg">Marina AI</h3>
                 <p className="text-xs text-blue-100">Luxury Yacht Concierge</p>
               </div>
               <div className="flex items-center gap-2">
