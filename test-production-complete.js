@@ -46,34 +46,34 @@ async function testProductionSystem() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ Response: ${data.response.substring(0, 100)}...`)
+        console.log(` Response: ${data.response.substring(0, 100)}...`)
         console.log(`📊 Type: ${data.type}`)
         
         // Check authentication requirements
         if (scenario.expectedAuth === false && data.type === 'auth_required') {
-          console.log('✅ Correctly requires authentication')
+          console.log(' Correctly requires authentication')
         } else if (scenario.expectedAuth === true && data.type === 'auth_required') {
           console.log('❌ Unexpectedly requires authentication')
         } else if (scenario.expectedAuth === true && data.type !== 'auth_required') {
-          console.log('✅ Authentication passed')
+          console.log(' Authentication passed')
         }
         
         // Check for payment processing
         if (scenario.expectPayment && data.payment) {
-          console.log('✅ Payment order created:', data.payment.id)
-          console.log('✅ Razorpay key provided:', !!data.razorpayKey)
+          console.log(' Payment order created:', data.payment.id)
+          console.log(' Razorpay key provided:', !!data.razorpayKey)
         }
         
         // Check for redirect
         if (scenario.expectRedirect && data.type === 'redirect') {
-          console.log('✅ Correctly redirected non-yacht query')
+          console.log(' Correctly redirected non-yacht query')
         } else if (scenario.expectRedirect && data.type !== 'redirect') {
           console.log('❌ Should have redirected non-yacht query')
         }
         
         // Check for booking details
         if (data.booking) {
-          console.log('✅ Booking details:', {
+          console.log(' Booking details:', {
             id: data.booking.id,
             status: data.booking.status,
             yachtName: data.booking.yachtName
@@ -110,7 +110,7 @@ async function testProductionSystem() {
     
     if (verifyResponse.ok) {
       const verifyData = await verifyResponse.json()
-      console.log('✅ Payment verification response:', verifyData.success)
+      console.log(' Payment verification response:', verifyData.success)
     } else {
       console.log('⚠️ Payment verification failed (expected for mock data)')
     }
@@ -125,7 +125,7 @@ async function testProductionSystem() {
     
     if (statusResponse.ok) {
       const statusData = await statusResponse.json()
-      console.log('✅ Booking status query successful')
+      console.log(' Booking status query successful')
       console.log(`📊 Found ${statusData.count} bookings`)
     } else {
       console.log('⚠️ Booking status query failed (expected for mock data)')
@@ -134,16 +134,16 @@ async function testProductionSystem() {
     console.log('⚠️ Booking status test skipped (expected for mock data)')
   }
   
-  console.log('\n🎯 Production System Test Complete!')
+  console.log('\n Production System Test Complete!')
   console.log('\n📋 Summary:')
-  console.log('✅ Authentication checks implemented')
-  console.log('✅ Server-side Razorpay order creation')
-  console.log('✅ Payment signature verification')
-  console.log('✅ Database payment records')
-  console.log('✅ Booking lifecycle management')
-  console.log('✅ Chat context persistence')
-  console.log('✅ Domain restriction enforcement')
-  console.log('✅ Security and audit logging')
+  console.log(' Authentication checks implemented')
+  console.log(' Server-side Razorpay order creation')
+  console.log(' Payment signature verification')
+  console.log(' Database payment records')
+  console.log(' Booking lifecycle management')
+  console.log(' Chat context persistence')
+  console.log(' Domain restriction enforcement')
+  console.log(' Security and audit logging')
 }
 
 // Run the test

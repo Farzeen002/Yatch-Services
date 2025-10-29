@@ -17,7 +17,7 @@ async function testPaymentGeneration() {
     
     if (response.ok) {
       const data = await response.json()
-      console.log('✅ Payment generation successful!')
+      console.log(' Payment generation successful!')
       console.log('Order ID:', data.order.id)
       console.log('Amount:', data.paymentDetails.totalPriceSAR, 'SAR')
       console.log('Razorpay Key:', data.razorpayKey)

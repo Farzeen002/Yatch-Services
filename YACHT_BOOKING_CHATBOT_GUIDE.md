@@ -6,7 +6,7 @@ The WhosYEP AI Chatbot is a conversational AI assistant that helps users browse 
 
 ## Features
 
-### ✅ Implemented Features
+###  Implemented Features
 
 1. **Voice Interaction**
 

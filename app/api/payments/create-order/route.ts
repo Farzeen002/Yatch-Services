@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // ✅ Parse incoming data
+    //  Parse incoming data
     const body = await request.json()
     const { amount, currency = "INR", bookingId, yachtName } = body
     console.log("🧾 Payment order data received:", body)
@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ✅ Convert to paise (single conversion)
+    // Convert to paise (single conversion)
     const amountInPaise = convertToPaise(amount)
-    console.log("💰 Amount in paise:", amountInPaise)
+    console.log("Amount in paise:", amountInPaise)
 
-    // ✅ Prepare Razorpay order details
+    // Prepare Razorpay order details
     const orderOptions = {
       amount: amountInPaise,
       currency,
@@ -55,13 +55,13 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
       },
     }
-    console.log("⚙️ Razorpay order options:", orderOptions)
+    console.log("Razorpay order options:", orderOptions)
 
-    // ✅ Create Razorpay order
+    // Create Razorpay order
     const order = await razorpay.orders.create(orderOptions)
     console.log("Razorpay order created:", order)
 
-    // ✅ Send consistent response
+    // Send consistent response
     return NextResponse.json({
       id: order.id,
       amount: order.amount,

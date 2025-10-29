@@ -21,7 +21,7 @@ async function testCompleteFlow() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Response:', data.response.substring(0, 200) + '...')
+        console.log(' Response:', data.response.substring(0, 200) + '...')
         
         if (data.booking) {
           console.log('📋 Booking details:', data.booking)

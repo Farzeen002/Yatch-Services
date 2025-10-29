@@ -24,7 +24,7 @@ code: 'model_not_found'
 
 ---
 
-## ✅ Solutions
+##  Solutions
 
 ### Solution 1: Fix OpenAI API Quota
 
@@ -60,14 +60,14 @@ For testing without OpenAI, you can:
 
 ---
 
-### Solution 2: Fix GPT Model Error ✅ **ALREADY FIXED!**
+### Solution 2: Fix GPT Model Error  **ALREADY FIXED!**
 
 I've already updated your code to use **`gpt-4o-mini`** which is:
 
-- ✅ Currently available
-- ✅ Much cheaper than GPT-4
-- ✅ Faster responses
-- ✅ Good quality for chatbot use
+-  Currently available
+-  Much cheaper than GPT-4
+-  Faster responses
+-  Good quality for chatbot use
 
 **The updated code now uses:**
 
@@ -118,7 +118,7 @@ npm run dev
 
 | Model              | Input (per 1M tokens) | Output (per 1M tokens) | Quality   |
 | ------------------ | --------------------- | ---------------------- | --------- |
-| **gpt-4o-mini** ✅ | $0.15                 | $0.60                  | Good      |
+| **gpt-4o-mini**  | $0.15                 | $0.60                  | Good      |
 | gpt-4o             | $2.50                 | $10.00                 | Excellent |
 | gpt-3.5-turbo      | $0.50                 | $1.50                  | Basic     |
 
@@ -171,7 +171,7 @@ I've added **fallback handling** so your app won't crash:
 
 ### Voice Features (STT/TTS)
 
-✅ **If quota exceeded:**
+ **If quota exceeded:**
 
 - Shows user-friendly error: "Voice unavailable. Please use text input."
 - Automatically disables voice features
@@ -179,7 +179,7 @@ I've added **fallback handling** so your app won't crash:
 
 ### Chat Features
 
-✅ **If GPT model fails:**
+ **If GPT model fails:**
 
 - Returns fallback message
 - User can still browse yachts
@@ -228,7 +228,7 @@ After fixing your API key:
 
 ---
 
-## 🎯 Recommended Setup
+##  Recommended Setup
 
 **For Development/Testing:**
 
@@ -271,14 +271,14 @@ OPENAI_MODEL=gpt-4o
 
 ---
 
-## ✅ Summary
+##  Summary
 
 ### What I Fixed:
 
-1. ✅ Changed model from `gpt-4-turbo-preview` → `gpt-4o-mini`
-2. ✅ Added graceful error handling for quota exceeded
-3. ✅ Voice features fail gracefully when no credits
-4. ✅ App won't crash - shows user-friendly errors
+1.  Changed model from `gpt-4-turbo-preview` → `gpt-4o-mini`
+2.  Added graceful error handling for quota exceeded
+3.  Voice features fail gracefully when no credits
+4.  App won't crash - shows user-friendly errors
 
 ### What You Need to Do:
 

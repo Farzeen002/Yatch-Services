@@ -55,10 +55,10 @@ Updated all yacht links to use slugs:
 
 ## Benefits
 
-✅ **SEO-Friendly URLs** - Better for search engine optimization
-✅ **User-Friendly** - Easy to read and share (e.g., `/yachts/azure-explorer`)
-✅ **Backward Compatible** - Old UUID links still work
-✅ **Maintainable** - All slug logic centralized in `slug-utils.ts`
+ **SEO-Friendly URLs** - Better for search engine optimization
+ **User-Friendly** - Easy to read and share (e.g., `/yachts/azure-explorer`)
+ **Backward Compatible** - Old UUID links still work
+ **Maintainable** - All slug logic centralized in `slug-utils.ts`
 
 ## How It Works
 

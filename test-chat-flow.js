@@ -21,7 +21,7 @@ async function testChatFlow() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Response:', data.response.substring(0, 100) + '...')
+        console.log(' Response:', data.response.substring(0, 100) + '...')
         
         if (data.booking) {
           console.log('📋 Booking details:', data.booking)

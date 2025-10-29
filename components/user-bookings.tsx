@@ -324,6 +324,8 @@ interface UserBooking {
   id: string
   yacht_id: string
   yacht_name: string
+  yacht_image?: string
+  yacht_images?: string[]
   start_date: string
   end_date: string
   guests: number
@@ -331,6 +333,7 @@ interface UserBooking {
   status: 'pending' | 'confirmed' | 'approved' | 'checked' | 'cancelled'
   payment_id?: string
   payment_status?: 'pending' | 'completed' | 'failed'
+  payment_mode?: string
   created_at: string
 }
 
@@ -372,7 +375,19 @@ export default function UserBookings() {
       if (statusFilter !== "all") url.searchParams.set("status", statusFilter)
       const res = await fetch(url.toString())
       const data = await res.json()
-      if (res.ok) setBookings(data.bookings || [])
+      if (res.ok) {
+        // Map the yacht data from the nested yachts object
+        const formatted = (data.bookings || []).map((b: any) => ({
+          ...b,
+          yacht_name: b.yachts?.name || "Unknown Yacht",
+          yacht_image: b.yachts?.images?.length > 0 ? b.yachts.images[0] : "/placeholder.jpg",
+          yacht_images: b.yachts?.images || [],
+          location: b.yachts?.location || "Unknown",
+          // Use payment_id or razorpay_payment_id as fallback
+          payment_id: b.payment_id || b.razorpay_payment_id || null,
+        }));
+        setBookings(formatted)
+      }
     } catch (error) {
       console.error("Error fetching bookings:", error)
     } finally {
@@ -553,11 +568,11 @@ export default function UserBookings() {
                     <div className="flex justify-between items-center border-t pt-4">
                       <p className="text-xs text-gray-500">Booked on {formatDate(b.created_at)}</p>
                       <div className="flex gap-2">
+                        <Button size="sm" onClick={() => (window.location.href = `/bookings/${b.id}`)}>
+                          <Eye className="h-4 w-4 mr-2" /> View Details
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => downloadBookingPDF(b)}>
                           <Download className="h-4 w-4 mr-2" /> PDF
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => (window.location.href = `/yachts/${createSlug(b.yacht_name)}`)}>
-                          <Eye className="h-4 w-4 mr-2" /> View Yacht
                         </Button>
                       </div>
                     </div>
@@ -579,3 +594,5 @@ const Info = ({ label, value }: { label: string; value: string }) => (
     <p className="text-sm font-medium text-gray-800">{value}</p>
   </div>
 )
+
+

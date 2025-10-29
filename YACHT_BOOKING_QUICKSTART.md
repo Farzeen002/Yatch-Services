@@ -106,7 +106,7 @@ Application will start at `http://localhost:3000`
 
 ## Features
 
-### ✅ What Works
+###  What Works
 
 - [x] Fetch and display all yachts from database
 - [x] Select yacht from list (click on yacht card)
@@ -355,4 +355,4 @@ Response with Rich UI
 
 **Version**: 1.0.0  
 **Last Updated**: October 27, 2025  
-**Status**: ✅ Production Ready
+**Status**:  Production Ready

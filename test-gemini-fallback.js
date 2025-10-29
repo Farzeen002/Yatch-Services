@@ -25,24 +25,24 @@ async function testGeminiFallback() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ Response: ${data.response.substring(0, 150)}...`)
+        console.log(` Response: ${data.response.substring(0, 150)}...`)
         console.log(`📊 Type: ${data.type}`)
         
         // Check for fallback responses
         if (data.response.includes('technical difficulties')) {
-          console.log('✅ Fallback response detected (AI overload handled)')
+          console.log(' Fallback response detected (AI overload handled)')
         } else if (data.response.includes('Marina')) {
-          console.log('✅ Normal AI response generated')
+          console.log(' Normal AI response generated')
         }
         
         // Check for booking context
         if (data.response.includes('Marina Star')) {
-          console.log('✅ Context maintained (yacht selection remembered)')
+          console.log(' Context maintained (yacht selection remembered)')
         }
         
         // Check for payment processing
         if (data.response.includes('[🔗 CLICK HERE TO PAY')) {
-          console.log('✅ Payment button generated')
+          console.log(' Payment button generated')
         }
         
       } else {
@@ -58,12 +58,12 @@ async function testGeminiFallback() {
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
   
-  console.log('\n🎯 Gemini AI Fallback Test Complete!')
+  console.log('\n Gemini AI Fallback Test Complete!')
   console.log('\n📋 SUMMARY:')
-  console.log('✅ AI overload errors handled gracefully')
-  console.log('✅ Fallback responses provided')
-  console.log('✅ Context maintained during errors')
-  console.log('✅ System remains functional')
+  console.log(' AI overload errors handled gracefully')
+  console.log(' Fallback responses provided')
+  console.log(' Context maintained during errors')
+  console.log(' System remains functional')
 }
 
 // Run the test

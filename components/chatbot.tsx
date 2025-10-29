@@ -105,7 +105,7 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
               // Payment successful
               const successMessage: ExtendedChatMessage = {
                 id: Date.now() + 1,
-                text: `✅ **Payment Successful!**\n\n` +
+                text: ` **Payment Successful!**\n\n` +
                       `🎉 Your booking for **${paymentData.yachtName}** is confirmed!\n\n` +
                       `**Payment Details:**\n` +
                       `Payment ID: ${response.razorpay_payment_id}\n` +

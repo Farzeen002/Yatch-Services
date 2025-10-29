@@ -100,7 +100,7 @@ export default function AutomationHighlights() {
               <span className="text-gray-700">WhatsApp bot integration</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+              <span className="text-3xl"></span>
               <span className="text-gray-700">AI trip recommendations</span>
             </div>
             <div className="flex items-center gap-3">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 
-// ✅ GET /api/user/profile - Get user profile (includes user.id and email)
+//  GET /api/user/profile - Get user profile (includes user.id and email)
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // ✅ Add Supabase auth user ID and email to the response
+    //  Add Supabase auth user ID and email to the response
     const enrichedProfile = {
       ...profile,
       id: user.id,
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ✅ POST /api/user/profile - Create or update user profile
+//  POST /api/user/profile - Create or update user profile
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient()
@@ -166,10 +166,7 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> 24c38a2a82b14d95e0da5e7097b032abf126b0c7
-=======
->>>>>>> 6698c5d3b6d54f1dcc9a5c9f2e806a511205458f
+
+
+

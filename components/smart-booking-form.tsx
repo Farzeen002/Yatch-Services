@@ -375,9 +375,9 @@ export default function SmartBookingForm({ yacht, onBookingComplete }: BookingFo
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-green-700">
-                <p>✅ Yacht is available for your selected dates</p>
-                <p>✅ Capacity confirmed: {formData.guests} guests</p>
-                <p>✅ Remaining capacity: {availability.remainingCapacity} guests</p>
+                <p> Yacht is available for your selected dates</p>
+                <p> Capacity confirmed: {formData.guests} guests</p>
+                <p> Remaining capacity: {availability.remainingCapacity} guests</p>
               </CardContent>
             </Card>
           )}

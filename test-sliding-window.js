@@ -5,10 +5,10 @@ async function testSlidingWindow() {
   const sessionId = `sliding_test_${Date.now()}`
   
   console.log('📋 TESTING SLIDING WINDOW FEATURES:')
-  console.log('✅ Max 10 messages in context')
-  console.log('✅ Automatic trimming of old messages')
-  console.log('✅ Retry logic for 503 errors')
-  console.log('✅ TTL for chat sessions (24h)')
+  console.log(' Max 10 messages in context')
+  console.log(' Automatic trimming of old messages')
+  console.log(' Retry logic for 503 errors')
+  console.log(' TTL for chat sessions (24h)')
   
   console.log('\n🧪 Testing Long Conversation:')
   
@@ -44,17 +44,17 @@ async function testSlidingWindow() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ Response: ${data.response.substring(0, 100)}...`)
+        console.log(` Response: ${data.response.substring(0, 100)}...`)
         console.log(`📊 Type: ${data.type}`)
         
         // Check for sliding window logs
         if (data.response.includes('technical difficulties')) {
-          console.log('✅ Fallback response (AI overload handled)')
+          console.log(' Fallback response (AI overload handled)')
         }
         
         // Check for context maintenance
         if (data.response.includes('Marina Star')) {
-          console.log('✅ Context maintained (yacht selection remembered)')
+          console.log(' Context maintained (yacht selection remembered)')
         }
         
       } else {
@@ -70,13 +70,13 @@ async function testSlidingWindow() {
     await new Promise(resolve => setTimeout(resolve, 500))
   }
   
-  console.log('\n🎯 Sliding Window Test Complete!')
+  console.log('\n Sliding Window Test Complete!')
   console.log('\n📋 SUMMARY:')
-  console.log('✅ Sliding window memory implemented')
-  console.log('✅ Context trimmed to last 10 messages')
-  console.log('✅ Retry logic for 503 errors')
-  console.log('✅ TTL for automatic cleanup')
-  console.log('✅ No more token overflow issues')
+  console.log(' Sliding window memory implemented')
+  console.log(' Context trimmed to last 10 messages')
+  console.log(' Retry logic for 503 errors')
+  console.log(' TTL for automatic cleanup')
+  console.log(' No more token overflow issues')
 }
 
 // Run the test

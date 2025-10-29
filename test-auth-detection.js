@@ -14,7 +14,7 @@ async function testAuthDetection() {
     
     if (response.ok) {
       const data = await response.json()
-      console.log('✅ Response received')
+      console.log(' Response received')
       console.log('Response:', data.response)
       console.log('Type:', data.type)
       

@@ -19,7 +19,7 @@ export function checkYachtAvailability(
   endDate: Date | null,
   yachtAvailabilities: YachtAvailability[]
 ): AvailabilityCheck {
-  // ✅ Fix: match by yachtId, not y.id
+  //  Fix: match by yachtId, not y.id
   const yacht = yachtAvailabilities.find(y => y.yachtId === yachtId)
 
   if (!yacht) {
@@ -30,7 +30,7 @@ export function checkYachtAvailability(
     }
   }
 
-  // ✅ Fix: prevent "not iterable" error if arrays are undefined/null
+  //  Fix: prevent "not iterable" error if arrays are undefined/null
   const allUnavailableDates = [
     ...(Array.isArray(yacht.unavailableDates) ? yacht.unavailableDates : []),
     ...(Array.isArray(yacht.maintenanceDates) ? yacht.maintenanceDates : [])
@@ -38,7 +38,7 @@ export function checkYachtAvailability(
 
   const conflictingDates: Date[] = []
 
-  // ✅ Handle single-day booking properly
+  //  Handle single-day booking properly
   const effectiveEndDate = endDate ?? startDate
 
   // Check date order safely
@@ -92,7 +92,7 @@ export function getYachtUnavailableDates(
   const yacht = yachtAvailabilities.find(y => y.yachtId === yachtId)
   if (!yacht) return []
 
-  // ✅ Guard against undefined arrays
+  //  Guard against undefined arrays
   const unavailable = Array.isArray(yacht.unavailableDates)
     ? yacht.unavailableDates
     : []

@@ -42,22 +42,22 @@ async function testRealPaymentLinks() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ Response: ${data.response.substring(0, 150)}...`)
+        console.log(` Response: ${data.response.substring(0, 150)}...`)
         console.log(`📊 Type: ${data.type}`)
         
         // Check for payment link generation
         if (data.response.includes('[🔗 CLICK HERE TO PAY')) {
-          console.log('✅ Payment button found!')
+          console.log(' Payment button found!')
           
           // Extract payment link
           const linkMatch = data.response.match(/\[🔗 CLICK HERE TO PAY[^\]]+\]\(([^)]+)\)/)
           if (linkMatch) {
             const paymentUrl = linkMatch[1]
-            console.log('✅ Payment URL generated:', paymentUrl)
+            console.log(' Payment URL generated:', paymentUrl)
             
             // Check if it's a real Razorpay URL
             if (paymentUrl.includes('checkout.razorpay.com')) {
-              console.log('✅ REAL Razorpay checkout URL!')
+              console.log(' REAL Razorpay checkout URL!')
             } else {
               console.log('❌ Not a real Razorpay URL')
             }
@@ -66,15 +66,15 @@ async function testRealPaymentLinks() {
         
         // Check for booking and payment data
         if (data.booking) {
-          console.log('✅ Booking created:', data.booking.id)
+          console.log(' Booking created:', data.booking.id)
         }
         
         if (data.payment) {
-          console.log('✅ Payment order created:', data.payment.id)
+          console.log(' Payment order created:', data.payment.id)
         }
         
         if (data.razorpayKey) {
-          console.log('✅ Razorpay key provided:', data.razorpayKey.substring(0, 10) + '...')
+          console.log(' Razorpay key provided:', data.razorpayKey.substring(0, 10) + '...')
         }
         
       } else {
@@ -90,12 +90,12 @@ async function testRealPaymentLinks() {
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
   
-  console.log('\n🎯 PAYMENT LINK TEST COMPLETE!')
+  console.log('\n PAYMENT LINK TEST COMPLETE!')
   console.log('\n📋 SUMMARY:')
-  console.log('✅ Real Razorpay integration')
-  console.log('✅ Clickable payment buttons')
-  console.log('✅ Production-ready payment links')
-  console.log('✅ Secure checkout URLs')
+  console.log(' Real Razorpay integration')
+  console.log(' Clickable payment buttons')
+  console.log(' Production-ready payment links')
+  console.log(' Secure checkout URLs')
 }
 
 // Run the test

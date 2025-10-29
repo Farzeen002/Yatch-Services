@@ -31,12 +31,12 @@ export default function Navigation() {
     { href: "/user", label: "My Bookings", role: "user" },
   ];
 
-  // ✅ Show base menu immediately
+  //  Show base menu immediately
   const [visibleLinks, setVisibleLinks] = useState(
     allLinks.filter((l) => !l.role) // show public first
   );
 
-  // ✅ Fetch user in background (non-blocking)
+  //  Fetch user in background (non-blocking)
   useEffect(() => {
     let cancelled = false;
 
@@ -85,7 +85,7 @@ export default function Navigation() {
     };
   }, []);
 
-  // ✅ Update visible links after user loads (fast switch)
+  //  Update visible links after user loads (fast switch)
   useEffect(() => {
     if (!userLoaded) return;
 
@@ -99,7 +99,7 @@ export default function Navigation() {
     setVisibleLinks(filtered);
   }, [user, userLoaded]);
 
-  // ✅ Popup logic (3s delay only for guests)
+  //  Popup logic (3s delay only for guests)
   useEffect(() => {
     if (!userLoaded) return;
 

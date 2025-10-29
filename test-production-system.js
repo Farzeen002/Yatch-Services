@@ -50,7 +50,7 @@ async function testProductionSystem() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ Response: ${data.response.substring(0, 100)}...`)
+        console.log(` Response: ${data.response.substring(0, 100)}...`)
         console.log(`📊 Type: ${data.type}`)
         
         if (data.booking) {
@@ -63,7 +63,7 @@ async function testProductionSystem() {
         
         // Check if response contains expected content
         if (data.response.toLowerCase().includes(testCase.expectedResponse.toLowerCase())) {
-          console.log(`✅ Expected content found: "${testCase.expectedResponse}"`)
+          console.log(` Expected content found: "${testCase.expectedResponse}"`)
         } else {
           console.log(`❌ Expected content not found: "${testCase.expectedResponse}"`)
         }
@@ -107,7 +107,7 @@ async function testRateLimiting() {
   
   console.log(`📊 Total requests: ${responses.length}`)
   console.log(`🚫 Rate limited: ${rateLimited.length}`)
-  console.log(`✅ Success rate: ${((responses.length - rateLimited.length) / responses.length * 100).toFixed(1)}%`)
+  console.log(` Success rate: ${((responses.length - rateLimited.length) / responses.length * 100).toFixed(1)}%`)
 }
 
 // Run all tests
