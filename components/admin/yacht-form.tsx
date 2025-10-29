@@ -22,6 +22,8 @@ import {
 } from "lucide-react"
 import { nanoid } from "nanoid"
 import { createClient } from "@/utils/supabase/client"
+import { nanoid } from "nanoid"
+import { useRouter } from "next/navigation"
 
 const yachtTypes = [
   "Motor Yacht",
@@ -239,6 +241,7 @@ export default function YachtForm({ initialData, onSuccess, onCancel }: YachtFor
       unavailableDates: prev.unavailableDates.filter((x) => x !== d),
     }))
 
+  // --- Submit Form ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)

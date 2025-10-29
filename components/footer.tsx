@@ -5,7 +5,8 @@ import { Mail, Phone, MapPin, Anchor, Facebook, Twitter, Instagram, Linkedin } f
 export default function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground py-16 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full px-6 lg:px-12">
+
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
