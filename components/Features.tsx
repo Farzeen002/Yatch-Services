@@ -168,31 +168,7 @@ const router = useRouter();
               </motion.div>
             ))}
           </div>
-        </motion.div>
-
-        {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="text-center mt-16"
-        >
-          <h3 className="text-3xl font-bold mb-4">
-            Ready to Transform Your Business?
-          </h3>
-          <p className="text-white/80 mb-8 text-lg">
-            Join thousands of yacht owners who trust Marina
-          </p>
-          <motion.button
-           onClick={() => router.push("/yachts")}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-10 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-black shadow-glow"
-          >
-           Explore Yachtes
-          </motion.button>
-        </motion.div>
+        </motion.div>  
       </div>
     </section>
   );
