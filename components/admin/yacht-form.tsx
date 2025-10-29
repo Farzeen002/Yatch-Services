@@ -22,7 +22,6 @@ import {
 } from "lucide-react"
 import { nanoid } from "nanoid"
 import { createClient } from "@/utils/supabase/client"
-import { nanoid } from "nanoid"
 import { useRouter } from "next/navigation"
 
 const yachtTypes = [

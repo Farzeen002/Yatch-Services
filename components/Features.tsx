@@ -12,6 +12,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export default function ServicesWithVideoBackground() {
   const services = [
@@ -58,7 +59,7 @@ export default function ServicesWithVideoBackground() {
       color: "from-blue-500/20 to-cyan-500/20",
     },
   ];
-
+const router = useRouter();
   const benefits = [
     { icon: Sparkles, text: "50% Faster Booking Process" },
     { icon: TrendingUp, text: "35% Revenue Increase" },
@@ -184,11 +185,12 @@ export default function ServicesWithVideoBackground() {
             Join thousands of yacht owners who trust Marina
           </p>
           <motion.button
+           onClick={() => router.push("/yachts")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-10 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-black shadow-glow"
           >
-            Start Free Trial
+           Explore Yachtes
           </motion.button>
         </motion.div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,12 +14,27 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Mail, Send, X } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { createClient } from "@/utils/supabase/client";
 
 export default function EmailSupportDialog() {
   const [open, setOpen] = useState(false);
-  const [userEmail] = useState("user@example.com");
+  const [userEmail, setUserEmail] = useState("guest@example.com");
+  const [userName, setUserName] = useState("Guest");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUserEmail(data.user.email ?? "guest@example.com");
+        setUserName(data.user.user_metadata?.full_name ?? "Guest");
+      }
+    }
+    fetchUser();
+  }, [supabase]);
 
   const handleSend = () => {
     if (!subject || !message) {
@@ -31,7 +46,6 @@ export default function EmailSupportDialog() {
       return;
     }
 
-    // ✅ TypeScript-safe toast with ReactNode using `as unknown as string`
     toast({
       title: (
         <div className="flex items-center gap-2">
@@ -41,7 +55,9 @@ export default function EmailSupportDialog() {
       ) as unknown as string,
       description: (
         <div className="text-sm text-gray-600">
-          <p>From: <strong>{userEmail}</strong></p>
+          <p>
+            From: <strong>{userEmail}</strong> ({userName})
+          </p>
           <p>To: <strong>marina@gmail.com</strong></p>
         </div>
       ) as unknown as string,
@@ -64,22 +80,20 @@ export default function EmailSupportDialog() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden rounded-2xl shadow-xl border border-blue-100 bg-white">
-          {/* Ocean-Themed Header */}
+          {/* Updated Header */}
           <DialogHeader className="gradient-ocean px-6 py-5 text-white">
             <VisuallyHidden>
-              <DialogTitle>New Message</DialogTitle>
+              <DialogTitle>Message Our Crew</DialogTitle>
             </VisuallyHidden>
 
             <div className="flex items-center justify-between">
-              {/* Left: Mail icon + title */}
               <div className="flex items-center gap-3">
                 <Mail className="w-6 h-6 text-white" />
                 <h2 className="text-xl font-semibold tracking-wide">
-                  New Message
+                  Message Our Crew
                 </h2>
               </div>
 
-              {/* Right: Close button */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -96,7 +110,7 @@ export default function EmailSupportDialog() {
             <div>
               <Label className="text-sm font-medium text-slate-600">From</Label>
               <Input
-                value={userEmail}
+                value={`${userName} (${userEmail})`}
                 disabled
                 className="mt-1 bg-white/60 border border-blue-100 rounded-md text-sm text-gray-800 shadow-sm focus-visible:ring-1 focus-visible:ring-sky-400"
               />

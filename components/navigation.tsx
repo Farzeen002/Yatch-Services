@@ -24,20 +24,20 @@ export default function Navigation() {
   const allLinks = [
     { href: "/", label: "Home" },
     { href: "/yachts", label: "Yachts" },
+    { href: "/support", label: "Customer Support" },
     { href: "/admin", label: "Dashboard", role: "admin" },
     { href: "/bookings", label: "Bookings", role: "admin" },
     { href: "/invoices", label: "Invoices", role: "admin" },
     { href: "/Staff", label: "Staff", role: "admin" },
     { href: "/user", label: "My Bookings", role: "user" },
-    { href: "/support", label: "Customer Support", role: "user" },
   ];
 
-  // ✅ Show base menu immediately
+  // ✅ Show base menu immediately (Home, Yachts, Customer Support)
   const [visibleLinks, setVisibleLinks] = useState(
-    allLinks.filter((l) => !l.role) // show public first
+    allLinks.filter((l) => !l.role)
   );
 
-  // ✅ Fetch user in background (non-blocking)
+  // ✅ Fetch user info from Supabase
   useEffect(() => {
     let cancelled = false;
 
@@ -86,11 +86,14 @@ export default function Navigation() {
     };
   }, []);
 
-  // ✅ Update visible links after user loads (fast switch)
+  // ✅ Update visible links when user loads
   useEffect(() => {
     if (!userLoaded) return;
 
     const filtered = allLinks.filter((link) => {
+      // Hide Customer Support for admins
+      if (user?.role === "admin" && link.href === "/support") return false;
+
       if (!link.role) return true;
       if (link.role === "admin" && user?.role === "admin") return true;
       if (link.role === "user" && user?.role === "user") return true;
@@ -100,12 +103,17 @@ export default function Navigation() {
     setVisibleLinks(filtered);
   }, [user, userLoaded]);
 
-  // ✅ Popup logic (3s delay only for guests)
+  // ✅ Popup logic (only for guests when 3 base links are visible)
   useEffect(() => {
     if (!userLoaded) return;
 
     const labels = visibleLinks.map((l) => l.label);
-    const onlyPublic = labels.length === 2 && labels.includes("Home") && labels.includes("Yachts");
+    const onlyPublic =
+      labels.length === 3 &&
+      labels.includes("Home") &&
+      labels.includes("Yachts") &&
+      labels.includes("Customer Support");
+
     const popupShown = sessionStorage.getItem("loginPopupShown");
 
     if (onlyPublic && !user && !popupShown) {
@@ -129,7 +137,7 @@ export default function Navigation() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setVisibleLinks(allLinks.filter((l) => !l.role)); // revert to base
+    setVisibleLinks(allLinks.filter((l) => !l.role));
     sessionStorage.removeItem("loginPopupShown");
     setShowLoginLink(true);
     router.push("/");
@@ -152,11 +160,7 @@ export default function Navigation() {
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}
-                href={
-                  link.href === "/yachts" && user?.role === "admin"
-                    ? "/yachts"
-                    : link.href
-                }
+                href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   pathname === link.href
                     ? "text-primary border-b-2 border-primary pb-1"
@@ -230,11 +234,7 @@ export default function Navigation() {
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}
-                href={
-                  link.href === "/yachts" && user?.role === "admin"
-                    ? "/admin/yachts"
-                    : link.href
-                }
+                href={link.href}
                 className={`block px-4 py-2 rounded text-sm font-medium ${
                   pathname === link.href
                     ? "bg-primary text-primary-foreground"
