@@ -21,7 +21,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
   const [newImageBase64, setNewImageBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch user data when modal opens
+  //  Fetch user data when modal opens
   useEffect(() => {
     if (!open) return;
 
@@ -69,7 +69,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
     fetchUser();
   }, [open]);
 
-  // ✅ Convert image file to Base64 and preview
+  //  Convert image file to Base64 and preview
   const handleImageChange = (file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -81,7 +81,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
     reader.readAsDataURL(file);
   };
 
-  // ✅ Save profile (Base64 image)
+  //  Save profile (Base64 image)
   const handleSave = async () => {
     if (!userId) return;
     setLoading(true);

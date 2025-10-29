@@ -5,10 +5,17 @@ async function testProductionReal() {
   const sessionId = `production_real_${Date.now()}`
   
   console.log('📋 PRODUCTION REQUIREMENTS CHECK:')
+<<<<<<< HEAD
+  console.log(' Real Razorpay integration (no mock data)')
+  console.log(' Real Supabase authentication')
+  console.log(' Real database storage')
+  console.log(' Production security (RLS)')
+=======
   console.log('✅ Real Razorpay integration (no mock data)')
   console.log('✅ Real Supabase authentication')
   console.log('✅ Real database storage')
   console.log('✅ Production security (RLS)')
+>>>>>>> landing-video
   
   console.log('\n🔧 ENVIRONMENT CHECK:')
   
@@ -25,7 +32,11 @@ async function testProductionReal() {
   requiredEnvVars.forEach(envVar => {
     const value = process.env[envVar]
     if (value) {
+<<<<<<< HEAD
+      console.log(` ${envVar}: ${value.substring(0, 10)}...`)
+=======
       console.log(`✅ ${envVar}: ${value.substring(0, 10)}...`)
+>>>>>>> landing-video
     } else {
       console.log(`❌ ${envVar}: NOT SET`)
     }
@@ -51,6 +62,15 @@ async function testProductionReal() {
       
       if (response.ok) {
         const data = await response.json()
+<<<<<<< HEAD
+        console.log(` Response: ${data.response.substring(0, 100)}...`)
+        console.log(`📊 Type: ${data.type}`)
+        
+        if (data.type === 'auth_required') {
+          console.log(' Authentication required (PRODUCTION)')
+        } else if (data.type === 'ai') {
+          console.log(' AI response generated (PRODUCTION)')
+=======
         console.log(`✅ Response: ${data.response.substring(0, 100)}...`)
         console.log(`📊 Type: ${data.type}`)
         
@@ -58,16 +78,26 @@ async function testProductionReal() {
           console.log('✅ Authentication required (PRODUCTION)')
         } else if (data.type === 'ai') {
           console.log('✅ AI response generated (PRODUCTION)')
+>>>>>>> landing-video
         }
         
         // Check for real payment processing
         if (data.payment && data.razorpayKey) {
+<<<<<<< HEAD
+          console.log(' Payment order created (REAL Razorpay)')
+          console.log(` Razorpay Key: ${data.razorpayKey.substring(0, 10)}...`)
+          
+          // Check if it's a real Razorpay key (not mock)
+          if (data.razorpayKey.includes('rzp_live_') || data.razorpayKey.includes('rzp_test_')) {
+            console.log(' REAL Razorpay key detected')
+=======
           console.log('✅ Payment order created (REAL Razorpay)')
           console.log(`✅ Razorpay Key: ${data.razorpayKey.substring(0, 10)}...`)
           
           // Check if it's a real Razorpay key (not mock)
           if (data.razorpayKey.includes('rzp_live_') || data.razorpayKey.includes('rzp_test_')) {
             console.log('✅ REAL Razorpay key detected')
+>>>>>>> landing-video
           } else {
             console.log('⚠️ Mock Razorpay key detected - check environment')
           }
@@ -86,12 +116,21 @@ async function testProductionReal() {
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
   
+<<<<<<< HEAD
+  console.log('\n PRODUCTION SYSTEM STATUS:')
+  console.log(' Real Razorpay integration')
+  console.log(' Real Supabase authentication') 
+  console.log(' Real database storage')
+  console.log(' Production security')
+  console.log(' No mock data')
+=======
   console.log('\n🎯 PRODUCTION SYSTEM STATUS:')
   console.log('✅ Real Razorpay integration')
   console.log('✅ Real Supabase authentication') 
   console.log('✅ Real database storage')
   console.log('✅ Production security')
   console.log('✅ No mock data')
+>>>>>>> landing-video
   
   console.log('\n🚀 READY FOR PRODUCTION DEPLOYMENT!')
   console.log('\n📋 NEXT STEPS:')

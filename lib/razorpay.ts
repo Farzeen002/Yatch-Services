@@ -1,25 +1,29 @@
-// Razorpay configuration
+// razorpay.config.ts
+import Razorpay from "razorpay"
+
+const razorpayEnabled = process.env.RAZORPAY_ENABLED === "true"
+
+// Razorpay configuration (from .env)
 export const razorpayConfig = {
-  enabled: true, // Enable Razorpay
-  keyId: 'rzp_test_RW6A4PqTDTOfaI',
-  keySecret: 'k6CJGD4jnACepn4Ic7dwUtWB',
-  publicKeyId: 'rzp_test_RW6A4PqTDTOfaI'
+  enabled: razorpayEnabled,
+  keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+  keySecret: process.env.RAZORPAY_KEY_SECRET || "",
+  publicKeyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
 }
 
 // Razorpay instance for server-side operations
-import Razorpay from 'razorpay'
+export const razorpay = razorpayEnabled
+  ? new Razorpay({
+      key_id: razorpayConfig.keyId,
+      key_secret: razorpayConfig.keySecret,
+    })
+  : null
 
-export const razorpay = new Razorpay({
-  key_id: razorpayConfig.keyId,
-  key_secret: razorpayConfig.keySecret,
-})
-
-// Payment amount should be in paise (smallest currency unit)
+// Payment helpers
 export const convertToPaise = (amount: number): number => {
   return Math.round(amount * 100)
 }
 
-// Convert paise back to rupees
 export const convertFromPaise = (amount: number): number => {
   return amount / 100
 }

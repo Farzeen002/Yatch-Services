@@ -102,3 +102,9 @@ Once the database is set up:
 3. Verify the booking appears in the bookings page
 4. Check that the admin can see and manage bookings
 
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> landing-video

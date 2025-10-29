@@ -21,7 +21,11 @@ async function testGeminiAPI() {
     const response = await result.response;
     const text = response.text();
     
+<<<<<<< HEAD
+    console.log(' Gemini API is working!');
+=======
     console.log('✅ Gemini API is working!');
+>>>>>>> landing-video
     console.log('Response:', text);
   } catch (error) {
     console.error('❌ Gemini API Error:', error.message);

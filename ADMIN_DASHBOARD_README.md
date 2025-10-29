@@ -4,7 +4,7 @@ A professional, sea-themed admin dashboard for managing yacht bookings, built wi
 
 ## Features
 
-### 🎯 Dashboard Overview
+###  Dashboard Overview
 - **Total Yachts** - Fleet management overview
 - **Booked Yachts** - Currently reserved yachts
 - **New Enquiries** - Customer inquiries requiring attention

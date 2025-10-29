@@ -4,7 +4,6 @@ import { checkYachtAvailability, createBooking, calculateBookingPrice } from "@/
 export async function POST(request: Request) {
   try {
     const { yachtId, startDate, endDate, guests } = await request.json()
-    
     // Validate input
     if (!yachtId || !startDate || !endDate || !guests) {
       return Response.json(
@@ -12,45 +11,42 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    
+
     // Check if user is authenticated (with cookies)
     const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+
     if (authError || !user) {
       return Response.json(
         { success: false, error: 'Please log in to make a booking', requiresAuth: true },
         { status: 401 }
       )
     }
-    
     // Get yacht details for pricing
     const { data: yacht, error: yachtError } = await supabase
       .from('yachts')
       .select('*')
       .eq('id', yachtId)
       .single()
-    
     if (yachtError || !yacht) {
       return Response.json(
         { success: false, error: 'Yacht not found' },
         { status: 404 }
       )
     }
-    
+
     // Calculate pricing
     const pricing = calculateBookingPrice(yacht.price, startDate, endDate, guests)
-    
+
     // Check availability
     const availability = await checkYachtAvailability(yachtId, startDate, endDate, guests)
-    
+
     if (!availability.available) {
       return Response.json(
         { success: false, error: availability.error },
         { status: 400 }
       )
     }
-    
     // Create booking
     const bookingResult = await createBooking({
       yachtId,
@@ -60,14 +56,12 @@ export async function POST(request: Request) {
       guests,
       totalPrice: pricing.totalPrice
     })
-    
     if (!bookingResult.success) {
       return Response.json(
         { success: false, error: bookingResult.error },
         { status: 400 }
       )
     }
-    
     return Response.json({
       success: true,
       booking: bookingResult.booking,
@@ -77,7 +71,6 @@ export async function POST(request: Request) {
         remainingCapacity: availability.remainingCapacity
       }
     })
-    
   } catch (error) {
     console.error('Booking API error:', error)
     return Response.json(
@@ -91,44 +84,61 @@ export async function GET(request: Request) {
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
     if (authError || !user) {
       return Response.json(
         { success: false, error: 'Please log in to view bookings' },
         { status: 401 }
       )
     }
-    
-    // Get user bookings (removed payments join as table doesn't exist)
+
+    // Get user bookings with yacht details
+    // Query only fields that exist in the database
     const { data: bookings, error } = await supabase
-      .from('bookings')
+      .from("bookings")
       .select(`
-        *,
-        yachts(name, type, location, images)
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-    
+    id,
+    user_id,
+    yacht_id,
+    start_date,
+    end_date,
+    guests,
+    total_price,
+    status,
+    payment_status,
+    payment_id,
+    razorpay_payment_id,
+    booking_reference,
+    created_at,
+    updated_at,
+    yachts (
+      id,
+      name,
+      location,
+      images
+    )
+  `)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
     if (error) {
       console.error('Error fetching bookings:', error)
       return Response.json(
-        { success: false, error: 'Failed to fetch bookings' },
+        { success: false, error: 'Failed to fetch bookings: ' + error.message },
         { status: 500 }
       )
     }
-    
+
     return Response.json({
       success: true,
       bookings: bookings || []
     })
-    
   } catch (error) {
     console.error('Get bookings API error:', error)
     return Response.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
     )
-    }
+  }
 }
 
 

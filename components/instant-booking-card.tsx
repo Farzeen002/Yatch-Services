@@ -13,7 +13,6 @@ import BookingCalendar from "./booking-calendar"
 import BookingConfirmationModal from "./booking-confirmation-modal"
 import UserProfileModal from "./user-profile-modal"
 import { toast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 declare global {
   interface Window {
@@ -60,12 +59,6 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
   useEffect(() => {
     checkUserProfile()
   }, [])
-
-  const getAuthToken = async () => {
-    const supabase = createClientComponentClient()
-    const { data } = await supabase.auth.getSession()
-    return data.session?.access_token || ""
-  }
 
   const checkUserProfile = async () => {
     try {
@@ -141,84 +134,200 @@ export default function InstantBookingCard({ yacht, className = "" }: InstantBoo
     })
   }
 
+  // const processRazorpayPayment = async (
+  //   amount: number,
+  //   bookingId: string,
+  //   yachtName: string
+  // ): Promise<{ success: boolean; paymentId: string }> => {
+  //   try {
+  //     console.log(' Creating payment order with:', { amount, bookingId, yachtName })
+
+  //     const orderResponse = await fetch("/api/payments/create-order", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify({ amount, bookingId, yachtName })
+  //     })
+
+  //     console.log('📡 Order response status:', orderResponse.status)
+
+  //     if (!orderResponse.ok) {
+  //       const err = await orderResponse.json()
+  //       console.error('❌ Payment order error:', err)
+  //       throw new Error(err.error || "Failed to create payment order")
+  //     }
+
+  //     const orderData = await orderResponse.json()
+  //     await loadRazorpayScript()
+
+  //     const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+  //     if (!key) throw new Error("Razorpay key missing. Check .env.local")
+
+  //     //  FIX: Get auth token inside this function
+  //     const token = await getAuthToken()
+
+  //     return new Promise((resolve, reject) => {
+  //       const razorpay = new window.Razorpay({
+  //         key,
+  //         amount: orderData.amount,
+  //         currency: orderData.currency,
+  //         order_id: orderData.id,
+  //         name: "Yacht Services",
+  //         description: `Booking for ${yachtName}`,
+  //         handler: async (response: any) => {
+  //           try {
+  //             const verifyResponse = await fetch("/api/payments/verify", {
+  //               method: "POST",
+  //               headers: {
+  //                 "Content-Type": "application/json",
+  //                 Authorization: `Bearer ${token}`
+  //               },
+  //               body: JSON.stringify({
+  //                 razorpay_payment_id: response.razorpay_payment_id,
+  //                 razorpay_order_id: response.razorpay_order_id,
+  //                 razorpay_signature: response.razorpay_signature,
+  //                 bookingId
+  //               })
+  //             })
+
+  //             const verifyData = await verifyResponse.json()
+  //             if (verifyResponse.ok) {
+  //               resolve({ success: true, paymentId: response.razorpay_payment_id })
+  //             } else {
+  //               reject(new Error(verifyData.error || "Payment verification failed"))
+  //             }
+  //           } catch (error) {
+  //             reject(error)
+  //           }
+  //         },
+  //         prefill: {
+  //           name: userProfile?.full_name || "",
+  //           email: userProfile?.email || "",
+  //           contact: userProfile?.phone || ""
+  //         },
+  //         theme: { color: "#2563eb" },
+  //         modal: { ondismiss: () => reject(new Error("Payment cancelled")) }
+  //       })
+
+  //       razorpay.open()
+  //     })
+  //   } catch (error) {
+  //     console.error("Payment error:", error)
+  //     throw error
+  //   }
+  // }
+
   const processRazorpayPayment = async (
     amount: number,
     bookingId: string,
     yachtName: string
   ): Promise<{ success: boolean; paymentId: string }> => {
     try {
-      const token = await getAuthToken()
+      console.log(" Creating payment order with:", { amount, bookingId, yachtName });
 
+      //  Step 1: Create Razorpay order
       const orderResponse = await fetch("/api/payments/create-order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ amount, bookingId, yachtName })
-      })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, bookingId, yachtName }),
+      });
+
+      console.log("📡 Order response status:", orderResponse.status);
 
       if (!orderResponse.ok) {
-        const err = await orderResponse.json()
-        throw new Error(err.error || "Failed to create payment order")
+        const err = await orderResponse.json().catch(() => ({}));
+        console.error("❌ Payment order error:", err);
+        throw new Error(err.error || "Failed to create payment order");
       }
 
-      const orderData = await orderResponse.json()
-      await loadRazorpayScript()
+      const orderData = await orderResponse.json();
 
-      const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
-      if (!key) throw new Error("Razorpay key missing. Check .env.local")
+      //  Step 2: Load Razorpay SDK
+      await loadRazorpayScript();
 
+      const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!key) throw new Error("Razorpay key missing. Check .env.local");
+
+      //  Step 3: Add setImmediate polyfill (Next.js 15)
+      if (typeof window !== "undefined" && typeof window.setImmediate === "undefined") {
+        (window as any).setImmediate = (fn: (...args: any[]) => void, ...args: any[]) =>
+          window.setTimeout(fn, 0, ...args);
+      }
+
+      //  Step 4: Open Razorpay Checkout
       return new Promise((resolve, reject) => {
         const razorpay = new window.Razorpay({
           key,
-          amount: orderData.amount,
+          amount: orderData.amount, // in paise
           currency: orderData.currency,
           order_id: orderData.id,
           name: "Yacht Services",
           description: `Booking for ${yachtName}`,
           handler: async (response: any) => {
             try {
+              console.log(" Payment successful, verifying...");
+              console.log("📦 Payment data:", {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId,
+                amount,
+              });
+
+              //  Step 5: Verify payment and update booking/PDF
               const verifyResponse = await fetch("/api/payments/verify", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_signature: response.razorpay_signature,
-                  bookingId
-                })
-              })
+                  bookingId,
+                  amount,
+                }),
+              });
 
-              const verifyData = await verifyResponse.json()
-              if (verifyResponse.ok) {
-                resolve({ success: true, paymentId: response.razorpay_payment_id })
-              } else {
-                reject(new Error(verifyData.error || "Payment verification failed"))
+              console.log("📡 Verify response status:", verifyResponse.status);
+
+              //  Safely parse response JSON
+              let verifyData: any = null;
+              try {
+                verifyData = await verifyResponse.json();
+              } catch {
+                console.error("⚠️ Empty or invalid JSON from /api/payments/verify");
               }
-            } catch (error) {
-              reject(error)
+
+              if (!verifyResponse.ok) {
+                console.error("❌ Verification failed:", verifyData || verifyResponse.statusText);
+                throw new Error(
+                  verifyData?.error || "Payment verification failed on server"
+                );
+              }
+
+              console.log(" Payment verified successfully:", verifyData);
+              resolve({ success: true, paymentId: response.razorpay_payment_id });
+            } catch (verifyError) {
+              console.error("❌ Payment verification error:", verifyError);
+              reject(verifyError);
             }
           },
           prefill: {
-            name: userProfile?.full_name || "",
-            email: userProfile?.email || "",
-            contact: userProfile?.phone || ""
+            name: "Yacht Booking User",
+            email: "user@example.com",
+            contact: "9999999999",
           },
-          theme: { color: "#2563eb" },
-          modal: { ondismiss: () => reject(new Error("Payment cancelled")) }
-        })
+          theme: { color: "#1E40AF" },
+          modal: { ondismiss: () => reject(new Error("Payment cancelled")) },
+        });
 
-        razorpay.open()
-      })
+        razorpay.open();
+      });
     } catch (error) {
-      console.error("Payment error:", error)
-      throw error
+      console.error("❌ processRazorpayPayment failed:", error);
+      return { success: false, paymentId: "" };
     }
-  }
+  };
 
   const handleInstantBook = async () => {
     if (!selectedDates) {
@@ -259,12 +368,10 @@ if (!selectedDates.end) {
         guests
       }
 
-      const token = await getAuthToken()
       const bookingResponse = await fetch("/api/bookings", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(bookingData)
       })
@@ -359,7 +466,7 @@ if (!selectedDates.end) {
           {/* Date Selection */}
           <div className="mb-6">
             <Label className="text-sm font-semibold text-gray-700 mb-3 block">Choose Your Dates</Label>
-            {/* ✅ FIX 2: Convert yacht.id to number for yachtId prop */}
+            {/*  FIX 2: Convert yacht.id to number for yachtId prop */}
             <BookingCalendar
               onDateSelect={setSelectedDates}
               unavailableDates={yacht.unavailableDates}
@@ -469,7 +576,7 @@ if (!selectedDates.end) {
         </Card>
       </motion.div>
 
-      {/* ✅ FIX 3: Add null check before passing bookingDetails */}
+      {/*  FIX 3: Add null check before passing bookingDetails */}
       {bookingDetails && (
         <BookingConfirmationModal
           isOpen={showConfirmation}

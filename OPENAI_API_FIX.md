@@ -24,7 +24,11 @@ code: 'model_not_found'
 
 ---
 
+<<<<<<< HEAD
+##  Solutions
+=======
 ## ✅ Solutions
+>>>>>>> landing-video
 
 ### Solution 1: Fix OpenAI API Quota
 
@@ -60,6 +64,16 @@ For testing without OpenAI, you can:
 
 ---
 
+<<<<<<< HEAD
+### Solution 2: Fix GPT Model Error  **ALREADY FIXED!**
+
+I've already updated your code to use **`gpt-4o-mini`** which is:
+
+-  Currently available
+-  Much cheaper than GPT-4
+-  Faster responses
+-  Good quality for chatbot use
+=======
 ### Solution 2: Fix GPT Model Error ✅ **ALREADY FIXED!**
 
 I've already updated your code to use **`gpt-4o-mini`** which is:
@@ -68,6 +82,7 @@ I've already updated your code to use **`gpt-4o-mini`** which is:
 - ✅ Much cheaper than GPT-4
 - ✅ Faster responses
 - ✅ Good quality for chatbot use
+>>>>>>> landing-video
 
 **The updated code now uses:**
 
@@ -118,7 +133,11 @@ npm run dev
 
 | Model              | Input (per 1M tokens) | Output (per 1M tokens) | Quality   |
 | ------------------ | --------------------- | ---------------------- | --------- |
+<<<<<<< HEAD
+| **gpt-4o-mini**  | $0.15                 | $0.60                  | Good      |
+=======
 | **gpt-4o-mini** ✅ | $0.15                 | $0.60                  | Good      |
+>>>>>>> landing-video
 | gpt-4o             | $2.50                 | $10.00                 | Excellent |
 | gpt-3.5-turbo      | $0.50                 | $1.50                  | Basic     |
 
@@ -171,7 +190,11 @@ I've added **fallback handling** so your app won't crash:
 
 ### Voice Features (STT/TTS)
 
+<<<<<<< HEAD
+ **If quota exceeded:**
+=======
 ✅ **If quota exceeded:**
+>>>>>>> landing-video
 
 - Shows user-friendly error: "Voice unavailable. Please use text input."
 - Automatically disables voice features
@@ -179,7 +202,11 @@ I've added **fallback handling** so your app won't crash:
 
 ### Chat Features
 
+<<<<<<< HEAD
+ **If GPT model fails:**
+=======
 ✅ **If GPT model fails:**
+>>>>>>> landing-video
 
 - Returns fallback message
 - User can still browse yachts
@@ -228,7 +255,11 @@ After fixing your API key:
 
 ---
 
+<<<<<<< HEAD
+##  Recommended Setup
+=======
 ## 🎯 Recommended Setup
+>>>>>>> landing-video
 
 **For Development/Testing:**
 
@@ -271,6 +302,16 @@ OPENAI_MODEL=gpt-4o
 
 ---
 
+<<<<<<< HEAD
+##  Summary
+
+### What I Fixed:
+
+1.  Changed model from `gpt-4-turbo-preview` → `gpt-4o-mini`
+2.  Added graceful error handling for quota exceeded
+3.  Voice features fail gracefully when no credits
+4.  App won't crash - shows user-friendly errors
+=======
 ## ✅ Summary
 
 ### What I Fixed:
@@ -279,6 +320,7 @@ OPENAI_MODEL=gpt-4o
 2. ✅ Added graceful error handling for quota exceeded
 3. ✅ Voice features fail gracefully when no credits
 4. ✅ App won't crash - shows user-friendly errors
+>>>>>>> landing-video
 
 ### What You Need to Do:
 

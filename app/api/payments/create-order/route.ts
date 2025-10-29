@@ -1,36 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { razorpay, convertToPaise } from '@/lib/razorpay'
-import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { NextRequest, NextResponse } from "next/server"
+import { razorpay, razorpayConfig, convertToPaise } from "@/lib/razorpay"
+import { createServerSupabaseClient } from "@/utils/supabase/server"
 
 // POST /api/payments/create-order - Create Razorpay order
 export async function POST(request: NextRequest) {
   try {
     console.log("Creating Razorpay order...")
-    const supabase = await createServerSupabaseClient()
 
-    // ✅ Ensure user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      console.log("User not authenticated for payment:", authError)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    console.log("Payment order data received:", body)
-    const { amount, currency = 'INR', bookingId, yachtName } = body
-
-    if (!amount || !bookingId) {
+    // Ensure Razorpay is enabled
+    if (!razorpayConfig.enabled || !razorpay) {
+      console.warn("Razorpay is disabled or not initialized.")
       return NextResponse.json(
-        { error: 'Amount and booking ID are required' },
+        { error: "Razorpay is disabled in environment settings" },
         { status: 400 }
       )
     }
 
-    // ✅ Do NOT double-multiply; convert only once
+    //upabase authentication
+    const supabase = await createServerSupabaseClient()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.log(" User not authenticated:", authError)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    //  Parse incoming data
+    const body = await request.json()
+    const { amount, currency = "INR", bookingId, yachtName } = body
+    console.log("🧾 Payment order data received:", body)
+
+    if (!amount || !bookingId) {
+      return NextResponse.json(
+        { error: "Amount and booking ID are required" },
+        { status: 400 }
+      )
+    }
+
+    // Convert to paise (single conversion)
     const amountInPaise = convertToPaise(amount)
     console.log("Amount in paise:", amountInPaise)
 
-    // ✅ Create Razorpay order
+    // Prepare Razorpay order details
     const orderOptions = {
       amount: amountInPaise,
       currency,
@@ -38,25 +52,26 @@ export async function POST(request: NextRequest) {
       notes: {
         booking_id: bookingId,
         yacht_name: yachtName,
-        user_id: user.id
-      }
+        user_id: user.id,
+      },
     }
     console.log("Razorpay order options:", orderOptions)
 
+    // Create Razorpay order
     const order = await razorpay.orders.create(orderOptions)
     console.log("Razorpay order created:", order)
 
-    // ✅ Return consistent response keys
+    // Send consistent response
     return NextResponse.json({
-      id: order.id,              // <-- renamed from orderId
+      id: order.id,
       amount: order.amount,
       currency: order.currency,
-      receipt: order.receipt
+      receipt: order.receipt,
     })
-  } catch (error) {
-    console.error('Error creating Razorpay order:', error)
+  } catch (error: any) {
+    console.error("Error creating Razorpay order:", error)
     return NextResponse.json(
-      { error: 'Failed to create payment order' },
+      { error: error.message || "Failed to create payment order" },
       { status: 500 }
     )
   }
