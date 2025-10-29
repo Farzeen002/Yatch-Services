@@ -13,9 +13,11 @@ import { toast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
 import { createClient } from "@/utils/supabase/client";
 import EmailSupportDialog from "@/components/EmailSupportDialog";
+import ChatbotWrapper from "@/components/chatbot-wrapper";
 
 export default function Support() {
   const [showOptions, setShowOptions] = useState(false);
+  const [chatbotOpen, setChatbotOpen] = useState(true); // Auto-open on support page
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -26,6 +28,11 @@ export default function Support() {
   });
 
   const supabase = createClient();
+  
+  // Function to open chatbot
+  const openChatbot = () => {
+    setChatbotOpen(true);
+  };
 
   // ✅ Fetch user details from Supabase
   useEffect(() => {
@@ -224,7 +231,10 @@ export default function Support() {
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-foreground">Live Chat</h3>
                 <p className="text-muted-foreground mb-6 text-base">Instant support from our team</p>
-                <Button className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold px-6 py-2 shadow-md">
+                <Button 
+                  onClick={openChatbot}
+                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold px-6 py-2 shadow-md"
+                >
                   Start Chat
                 </Button>
               </CardContent>
@@ -365,6 +375,9 @@ export default function Support() {
           </motion.div>
         </div>
       </section>
+      
+      {/* Chatbot with auto-open */}
+      <ChatbotWrapper autoOpen={chatbotOpen} />
     </div>
   )
 }

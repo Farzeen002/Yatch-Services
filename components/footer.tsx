@@ -14,10 +14,10 @@ export default function Footer() {
               <div className="w-10 h-10 gradient-gold rounded-xl flex items-center justify-center">
                 <Anchor className="w-6 h-6 text-accent-foreground" />
               </div>
-              <span className="font-bold text-xl">Marina</span>
+              <span className="font-bold text-xl">Marassi Gulf</span>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
-              Experience luxury yacht booking powered by AI. Your perfect ocean adventure is just a click away.
+              Experience luxury yacht booking powered by Marassi AI. Your perfect ocean adventure is just a click away.
             </p>
             <div className="flex gap-3">
               <a href="#" className="w-10 h-10 rounded-lg bg-primary-foreground/10 hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-all">
@@ -97,8 +97,8 @@ export default function Footer() {
                 <Mail className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
                 <div>
                   <div className="font-medium mb-1">Email</div>
-                  <a href="mailto:support@marina.luxury" className="text-primary-foreground/70 hover:text-accent transition-colors">
-                    support@marina.luxury
+                  <a href="mailto:support@marassigulf.com" className="text-primary-foreground/70 hover:text-accent transition-colors">
+                    support@marassigulf.com
                   </a>
                 </div>
               </li>
@@ -116,7 +116,7 @@ export default function Footer() {
                 <div>
                   <div className="font-medium mb-1">Address</div>
                   <span className="text-primary-foreground/70">
-                    Marina Bay, Monaco 98000
+                    Marassi Gulf Marina, Jeddah, Saudi Arabia
                   </span>
                 </div>
               </li>
@@ -126,7 +126,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 Marina. All rights reserved.
+            © 2024 Marassi Gulf. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="text-primary-foreground/60 hover:text-accent transition-colors">

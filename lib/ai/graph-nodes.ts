@@ -1,5 +1,5 @@
 /**
- * WhosYEP AI - LangGraph Conversation Nodes
+ * Marassi AI - LangGraph Conversation Nodes
  * Handles different conversation flows and intents
  */
 
@@ -11,7 +11,11 @@ import { createSlug } from '../slug-utils'
 function getOpenAIModel() {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is not configured')
+    throw new Error(
+      'OPENAI_API_KEY is not configured. ' +
+      'Please add it to your .env.local file. ' +
+      'Get your API key from: https://platform.openai.com/api-keys'
+    )
   }
   
   // Use gpt-4o-mini for cost efficiency or gpt-4o for better quality
@@ -37,7 +41,26 @@ async function fetchAllYachts(baseUrl: string): Promise<any[]> {
   }
 }
 
-// Helper to find yacht by name (fuzzy matching)
+// Helper to calculate string similarity (Levenshtein-like)
+function similarity(str1: string, str2: string): number {
+  const longer = str1.length > str2.length ? str1 : str2
+  const shorter = str1.length > str2.length ? str2 : str1
+  
+  if (longer.length === 0) return 1.0
+  
+  // Check if one contains the other
+  if (longer.includes(shorter)) return 0.8
+  
+  // Calculate character matching
+  let matches = 0
+  for (let i = 0; i < shorter.length; i++) {
+    if (longer.includes(shorter[i])) matches++
+  }
+  
+  return matches / longer.length
+}
+
+// Helper to find yacht by name (improved fuzzy matching)
 function findYachtByName(yachts: any[], searchName: string): any | null {
   const normalizedSearch = searchName.toLowerCase().trim()
   
@@ -48,13 +71,31 @@ function findYachtByName(yachts: any[], searchName: string): any | null {
   
   if (found) return found
   
-  // Partial match
-  found = yachts.find(y => 
-    y.name.toLowerCase().includes(normalizedSearch) ||
-    normalizedSearch.includes(y.name.toLowerCase())
-  )
+  // Partial match (one contains the other)
+  found = yachts.find(y => {
+    const yachtName = y.name.toLowerCase()
+    return yachtName.includes(normalizedSearch) || 
+           normalizedSearch.includes(yachtName)
+  })
   
-  return found || null
+  if (found) return found
+  
+  // Fuzzy match with similarity threshold
+  let bestMatch: any = null
+  let bestScore = 0
+  
+  for (const yacht of yachts) {
+    const yachtName = yacht.name.toLowerCase()
+    const score = similarity(normalizedSearch, yachtName)
+    
+    // If similarity is > 60%, consider it a match
+    if (score > 0.6 && score > bestScore) {
+      bestScore = score
+      bestMatch = yacht
+    }
+  }
+  
+  return bestMatch
 }
 
 /**
@@ -70,8 +111,15 @@ export async function detectIntentNode(state: ConversationState): Promise<Conver
   
   const message = lastMessage.content.toLowerCase()
   
+  // Check for viewing existing bookings first (before booking intent)
+  if (message.match(/\b(view|show|see|check|my)\s+(my\s+)?(bookings?|reservations?|orders?)\b/i)) {
+    return updateContext(state, { 
+      currentIntent: 'view_bookings'
+    })
+  }
+  
   // Check for booking intent (highest priority)
-  if (message.match(/book|booking|reserve|reservation|rent|charter|i want to book/i)) {
+  if (message.match(/\b(book|reserve|rent|charter|i want to book)\b/i)) {
     return updateContext(state, { 
       currentIntent: 'booking',
       awaitingInput: state.context.selectedYacht ? 'guest_count' : null
@@ -98,9 +146,12 @@ export async function detectIntentNode(state: ConversationState): Promise<Conver
     return updateContext(state, { currentIntent: 'details' })
   }
   
-  // Check for support intent
-  if (message.match(/support|help|agent|contact|sales|team|human|speak|call/i)) {
-    return updateContext(state, { currentIntent: 'support' })
+  // Check for support/agent intent (expanded keywords)
+  if (message.match(/\b(support|help me|help|agent|contact|sales|team|human|speak|call|customer support|customer service|live chat|talk to someone|connect me|assistance|problem|issue|stuck)\b/i)) {
+    return updateContext(state, { 
+      currentIntent: 'support',
+      connectingToAgent: true
+    })
   }
   
   // If we're in a booking flow, maintain that context
@@ -139,6 +190,90 @@ export async function fetchYachtsNode(
 }
 
 /**
+ * Helper to fetch user bookings directly from Supabase
+ * This runs server-side, so we query the database directly instead of using the API
+ */
+async function fetchUserBookings(userId?: string): Promise<any[]> {
+  try {
+    if (!userId) {
+      console.log('[fetchUserBookings] No userId provided')
+      return []
+    }
+    
+    console.log('[fetchUserBookings] Fetching bookings for userId:', userId)
+    
+    // Import Supabase client
+    const { createClient } = await import('@supabase/supabase-js')
+    
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    // Try service role key first (bypasses RLS), fallback to anon key
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[fetchUserBookings] Supabase credentials not configured')
+      return []
+    }
+    
+    console.log('[fetchUserBookings] Using', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'service role' : 'anon', 'key')
+    
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+    
+    // Query bookings directly
+    const { data: bookings, error } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        user_id,
+        yacht_id,
+        start_date,
+        end_date,
+        guests,
+        total_price,
+        status,
+        payment_status,
+        payment_id,
+        razorpay_payment_id,
+        booking_reference,
+        created_at,
+        updated_at,
+        yachts (
+          id,
+          name,
+          location,
+          images
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('[fetchUserBookings] Error fetching bookings:', error)
+      return []
+    }
+    
+    console.log('[fetchUserBookings] Received bookings:', bookings?.length || 0, 'bookings')
+    if (bookings && bookings.length > 0) {
+      console.log('[fetchUserBookings] Bookings:', bookings.map(b => ({
+        id: b.id,
+        yacht: b.yachts?.name,
+        status: b.status,
+        payment: b.payment_status
+      })))
+    }
+    
+    return bookings || []
+  } catch (error) {
+    console.error('[fetchUserBookings] Error fetching user bookings:', error)
+    return []
+  }
+}
+
+/**
  * Node 3: Search for Specific Yacht
  * Searches for a yacht by name mentioned in conversation or fetches all yachts for listing
  */
@@ -150,6 +285,19 @@ export async function searchYachtNode(
   const message = lastMessage.content
   
   try {
+    // Handle "view bookings" intent first
+    if (state.context.currentIntent === 'view_bookings') {
+      // Fetch user bookings directly from database
+      const bookings = await fetchUserBookings(state.userId)
+      
+      console.log('[searchYachtNode] Fetched bookings for view_bookings intent:', bookings.length)
+      
+      return updateContext(state, {
+        userBookings: bookings,
+        bookingsFetched: true
+      })
+    }
+    
     // Fetch all yachts from API
     const yachts = await fetchAllYachts(baseUrl)
     
@@ -178,13 +326,14 @@ export async function searchYachtNode(
     // If user is searching for a specific yacht or mentioned a yacht name
     if (state.context.currentIntent === 'details' || state.context.currentIntent === 'booking') {
       // Try to extract yacht name from message
-      // Remove common words and look for potential yacht names
+      // Remove common words but use word boundaries to avoid truncation
       const words = message.toLowerCase()
-        .replace(/book|the|yacht|a|an|i want to|please|can you|show me/gi, '')
+        .replace(/\b(book|the|yacht|a|an|i want to|please|can you|show me)\b/gi, '')
+        .replace(/\s+/g, ' ')
         .trim()
       
       // Try to find yacht by name
-      if (words) {
+      if (words && words.length > 2) {
         const foundYacht = findYachtByName(yachts, words)
         
         if (foundYacht) {
@@ -200,10 +349,14 @@ export async function searchYachtNode(
             description: foundYacht.description
           }
           updates.yachtFound = true
+          // Clear the "not found" flags
+          updates.searchedYachtName = null
         } else {
-          // Yacht name mentioned but not found
-          updates.yachtFound = false
-          updates.searchedYachtName = words
+          // Only mark as not found if we have a meaningful search term
+          if (words.length > 3) {
+            updates.yachtFound = false
+            updates.searchedYachtName = words
+          }
         }
       }
     }
@@ -332,8 +485,19 @@ export async function generateResponseNode(
   } catch (error) {
     console.error('Error generating AI response:', error)
     
-    // Fallback response
-    const fallbackResponse = "I apologize, but I'm having trouble processing your request. Could you please rephrase?"
+    // Check if it's an API key error
+    let fallbackResponse = "I apologize, but I'm having trouble processing your request. Could you please rephrase?"
+    
+    if (error instanceof Error) {
+      if (error.message.includes('OPENAI_API_KEY')) {
+        fallbackResponse = "The chatbot is not configured yet. Please contact the administrator to set up the OpenAI API key."
+      } else if (error.message.includes('quota') || error.message.includes('insufficient_quota')) {
+        fallbackResponse = "The AI service is temporarily unavailable. Please try again later or use the yacht search directly."
+      } else if (error.message.includes('rate limit')) {
+        fallbackResponse = "Too many requests. Please wait a moment and try again."
+      }
+    }
+    
     const updatedState = addMessage(state, 'assistant', fallbackResponse)
     
     return {
@@ -351,7 +515,7 @@ export async function generateResponseNode(
  * Build system prompt based on current state
  */
 function buildSystemPrompt(state: ConversationState): string {
-  let prompt = `You are WhosYEP AI, a luxury yacht booking concierge assistant.
+  let prompt = `You are Marassi AI, a luxury yacht booking concierge assistant for Marassi Gulf.
 
 CORE CAPABILITIES:
 - Help users browse and search luxury yachts
@@ -438,6 +602,40 @@ BOOKING FLOW STEP-BY-STEP:
 `
   }
 
+  // Handle viewing bookings
+  if (state.context.currentIntent === 'view_bookings') {
+    const bookings = state.context.userBookings || []
+    
+    // Check if user is authenticated
+    if (!state.userId) {
+      prompt += `\nCurrent Step: User wants to view bookings but is NOT logged in
+- Politely inform them they need to sign in first to view bookings
+- Mention they can still browse yachts without logging in
+- Keep response friendly and helpful
+`
+    } else if (bookings.length > 0) {
+      prompt += `\nCurrent Step: User wants to view their bookings
+User Bookings (${bookings.length} total):\n`
+      bookings.forEach((booking: any, index: number) => {
+        prompt += `${index + 1}. ${booking.yachts?.name || 'Unknown Yacht'}
+   - Dates: ${booking.start_date} to ${booking.end_date}
+   - Guests: ${booking.guests}
+   - Total: $${booking.total_price}
+   - Status: ${booking.status}
+   - Payment: ${booking.payment_status}
+`
+      })
+      prompt += `\nSummarize these bookings in a friendly way. Mention the yacht names, dates, and statuses.`
+    } else {
+      prompt += `\nCurrent Step: User wants to view bookings
+User is logged in but has NO bookings yet.
+- Encourage them to browse available yachts
+- Offer to show the yacht catalog
+- Keep it friendly and inviting
+`
+    }
+  }
+
   prompt += `\nCurrent Intent: ${state.context.currentIntent}
 Awaiting: ${state.context.awaitingInput || 'user message'}
 `
@@ -476,7 +674,11 @@ function buildGraphOutput(state: ConversationState, responseText: string): Graph
   }
   
   // Check if yacht not found - suggest alternatives
-  if (context.yachtFound === false && context.availableYachts && context.availableYachts.length > 0) {
+  // Only show "not found" if we explicitly searched and didn't find
+  if (context.yachtFound === false && 
+      context.searchedYachtName && 
+      context.availableYachts && 
+      context.availableYachts.length > 0) {
     return {
       response: responseText,
       type: 'yacht_list',
@@ -515,11 +717,27 @@ function buildGraphOutput(state: ConversationState, responseText: string): Graph
     }
   }
   
-  // Support request
+  // Check if showing user bookings
+  if (context.currentIntent === 'view_bookings' && context.bookingsFetched) {
+    return {
+      response: responseText,
+      type: 'bookings_list',
+      data: {
+        bookings: context.userBookings || []
+      },
+      nextAction: 'await_input'
+    }
+  }
+  
+  // Support request - connecting to agent
   if (context.currentIntent === 'support') {
     return {
       response: responseText,
-      type: 'support',
+      type: 'agent_handoff',
+      data: {
+        agentStatus: 'connecting',
+        message: context.connectingToAgent ? 'Connecting you to Marassi Gulf Customer Support...' : responseText
+      },
       nextAction: 'complete'
     }
   }

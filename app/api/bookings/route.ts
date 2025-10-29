@@ -84,12 +84,18 @@ export async function GET(request: Request) {
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    console.log('[GET /api/bookings] Auth check - User:', user?.id, 'Error:', authError?.message)
+    
     if (authError || !user) {
+      console.log('[GET /api/bookings] User not authenticated')
       return Response.json(
         { success: false, error: 'Please log in to view bookings' },
         { status: 401 }
       )
     }
+
+    console.log('[GET /api/bookings] Fetching bookings for user_id:', user.id)
 
     // Get user bookings with yacht details
     // Query only fields that exist in the database
@@ -121,16 +127,34 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching bookings:', error)
+      console.error('[GET /api/bookings] Error fetching bookings:', error)
       return Response.json(
         { success: false, error: 'Failed to fetch bookings: ' + error.message },
         { status: 500 }
       )
     }
 
+    console.log('[GET /api/bookings] Found', bookings?.length || 0, 'bookings for user', user.id)
+    
+    // Debug: Also check if there are ANY bookings in the table
+    const { data: allBookings, error: allError } = await supabase
+      .from("bookings")
+      .select("id, user_id")
+      .limit(5)
+    
+    console.log('[GET /api/bookings] Total bookings in DB (sample):', allBookings?.length || 0)
+    if (allBookings && allBookings.length > 0) {
+      console.log('[GET /api/bookings] Sample user_ids in bookings:', allBookings.map(b => b.user_id))
+    }
+
     return Response.json({
       success: true,
-      bookings: bookings || []
+      bookings: bookings || [],
+      debug: {
+        userId: user.id,
+        userEmail: user.email,
+        bookingsCount: bookings?.length || 0
+      }
     })
   } catch (error) {
     console.error('Get bookings API error:', error)

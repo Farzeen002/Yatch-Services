@@ -6,6 +6,7 @@ import Footer from "@/components/footer"
 import Features from "@/components/Features"
 import Testimonials from "@/components/Testimonials"
 import { Pitch } from "@/components/pitch"
+import ChatbotWrapper from "@/components/chatbot-wrapper"
 
 
 export default function Home() {
@@ -14,10 +15,11 @@ export default function Home() {
       <Navigation />
       <HeroSection />
       <Pitch />
-         <Features />
+      <Features />
       <FeaturedYachts />
-         <Testimonials />
-      < Footer/>
-      </main>
-)
+      <Testimonials />
+      <Footer />
+      <ChatbotWrapper autoOpen={true} />
+    </main>
+  )
 }

@@ -12,22 +12,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { message, sessionId, action } = body
     
-    // Validate input
-    if (!message || !sessionId) {
-      return NextResponse.json(
-        { error: 'Message and sessionId are required' },
-        { status: 400 }
-      )
-    }
-    
-    // Handle clear chat action
+    // Handle clear chat action first (before validation)
     if (action === 'clear') {
+      if (!sessionId) {
+        return NextResponse.json(
+          { error: 'SessionId is required' },
+          { status: 400 }
+        )
+      }
       clearSessionState(sessionId)
       return NextResponse.json({
         response: "Chat history cleared! How can I help you today?",
         type: 'text',
         nextAction: 'await_input'
       })
+    }
+    
+    // Validate input for normal messages
+    if (!message || !sessionId) {
+      return NextResponse.json(
+        { error: 'Message and sessionId are required' },
+        { status: 400 }
+      )
     }
     
     // Get user authentication status

@@ -18,10 +18,12 @@ interface Message {
 
 interface WhosYEPAIChatbotProps {
   className?: string
+  autoOpen?: boolean
+  onOpenChange?: (isOpen: boolean) => void
 }
 
-export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export default function WhosYEPAIChatbot({ className = "", autoOpen = false, onOpenChange }: WhosYEPAIChatbotProps) {
+  const [isOpen, setIsOpen] = useState(autoOpen)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -38,13 +40,25 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
+  // Handle auto-open
+  useEffect(() => {
+    if (autoOpen) {
+      setIsOpen(true)
+    }
+  }, [autoOpen])
+
+  // Notify parent when open state changes
+  useEffect(() => {
+    onOpenChange?.(isOpen)
+  }, [isOpen, onOpenChange])
+
   // Initial greeting
   useEffect(() => {
     if (messages.length === 0) {
       addMessage({
         id: Date.now(),
         role: 'assistant',
-        content: "Hi! I'm Marina AI, your luxury yacht booking concierge. How can I assist you today?",
+        content: "Hi! I'm Marassi AI, your luxury yacht booking concierge. How can I assist you today?",
         timestamp: new Date(),
         type: 'text'
       })
@@ -306,10 +320,22 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
 
     // Render yacht list with selection
     if (message.type === 'yacht_list' && message.data?.yachts && message.data.yachts.length > 0) {
+      // Check if the searched yacht is actually in the list
+      const searchedYachtInList = message.data.searchedName ? 
+        message.data.yachts.some((y: any) => 
+          y.name.toLowerCase().includes(message.data.searchedName.toLowerCase()) ||
+          message.data.searchedName.toLowerCase().includes(y.name.toLowerCase())
+        ) : false
+      
+      // Only show "not found" if yacht truly isn't in the results
+      const showNotFound = message.data.notFound && 
+                          message.data.searchedName && 
+                          !searchedYachtInList
+      
       return (
         <div>
           <div className="mb-3">{elements}</div>
-          {message.data.notFound && message.data.searchedName && (
+          {showNotFound && (
             <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
               "{message.data.searchedName}" not found. Here are alternatives:
             </div>
@@ -345,11 +371,6 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
               </div>
             ))}
           </div>
-          {message.data.yachts.length > 5 && (
-            <p className="text-xs text-gray-500 mt-2">
-              Showing 5 of {message.data.yachts.length} yachts
-            </p>
-          )}
         </div>
       )
     }
@@ -413,6 +434,132 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
       )
     }
 
+    // Render agent handoff
+    if (message.type === 'agent_handoff') {
+      return (
+        <div>
+          <div className="mb-3">{elements}</div>
+          <div className="p-4 bg-blue-50 border-2 border-blue-300 rounded-lg animate-pulse">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center animate-bounce">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-blue-900 text-sm">🔗 Connecting to Marassi Gulf Customer Support</p>
+                <p className="text-xs text-blue-700 mt-1">Please wait while we connect you to a live agent...</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-md p-3 border border-blue-200">
+              <p className="text-xs text-gray-600 mb-2">📞 Available Support Channels:</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-green-600">●</span>
+                  <span className="font-medium">Live Chat</span>
+                  <span className="text-gray-500">- Available now</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-green-600">●</span>
+                  <span className="font-medium">Phone Support</span>
+                  <span className="text-gray-500">- +1-800-YACHT-SOS</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-blue-600">●</span>
+                  <span className="font-medium">Email</span>
+                  <span className="text-gray-500">- support@marassigulf.com</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 text-center">
+              <p className="text-xs text-blue-800 italic">
+                💡 For demo purposes: This simulates connecting to a live agent
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Render user bookings list
+    if (message.type === 'bookings_list' && message.data?.bookings) {
+      const bookings = message.data.bookings
+      
+      if (bookings.length === 0) {
+        return (
+          <div>
+            <div className="mb-3">{elements}</div>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-center">
+              <p className="text-gray-600">You don't have any bookings yet.</p>
+              <button
+                onClick={() => sendMessage("Show me all yachts")}
+                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Browse Yachts
+              </button>
+            </div>
+          </div>
+        )
+      }
+
+      return (
+        <div>
+          <div className="mb-3">{elements}</div>
+          <div className="space-y-3 mt-3">
+            {bookings.map((booking: any) => (
+              <div
+                key={booking.id}
+                className="p-3 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-gray-900">
+                      {booking.yachts?.name || 'Unknown Yacht'}
+                    </p>
+                    <p className="text-xs text-gray-600">{booking.yachts?.location}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {booking.status}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      booking.payment_status === 'completed' ? 'bg-green-100 text-green-800' :
+                      booking.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      booking.payment_status === 'failed' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {booking.payment_status === 'completed' ? 'Paid' : 
+                       booking.payment_status === 'pending' ? 'Payment Pending' :
+                       booking.payment_status}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p>📅 {new Date(booking.start_date).toLocaleDateString()} - {new Date(booking.end_date).toLocaleDateString()}</p>
+                  <p>👥 {booking.guests} guests</p>
+                  <p className="font-semibold text-blue-600">💰 ${booking.total_price}</p>
+                  {booking.booking_reference && (
+                    <p className="text-xs text-gray-500">Ref: {booking.booking_reference}</p>
+                  )}
+                </div>
+                <a
+                  href={`/bookings/${booking.id}`}
+                  className="mt-2 inline-block text-xs text-blue-600 hover:underline"
+                >
+                  View Details →
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
     return <div>{elements}</div>
   }
 
@@ -460,7 +607,7 @@ export default function WhosYEPAIChatbot({ className = "" }: WhosYEPAIChatbotPro
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 flex justify-between items-center">
               <div>
-                <h3 className="font-bold text-lg">Marina AI</h3>
+                <h3 className="font-bold text-lg">Marassi AI</h3>
                 <p className="text-xs text-blue-100">Luxury Yacht Concierge</p>
               </div>
               <div className="flex items-center gap-2">

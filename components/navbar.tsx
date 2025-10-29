@@ -15,7 +15,7 @@ export default function Navbar() {
           <div className="w-10 h-10 gradient-ocean rounded-xl flex items-center justify-center shadow-luxury">
             <Anchor className="w-6 h-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-primary">Marina</h1>
+          <h1 className="text-2xl font-bold text-primary">Marassi Gulf</h1>
         </div>
 
         <div className="hidden md:flex gap-8">
