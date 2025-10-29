@@ -11,8 +11,8 @@
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(21.664% 0.06136 252.816); /* Deep navy */
-  --primary-foreground: oklch(0.98 0 0);
+  --primary: oklch(0% 0 0); /* Deep navy */
+  --primary-foreground: oklch(100% 0.00011 271.152);
   
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.92 0 0);

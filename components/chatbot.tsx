@@ -105,7 +105,7 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
               // Payment successful
               const successMessage: ExtendedChatMessage = {
                 id: Date.now() + 1,
-                text: ` **Payment Successful!**\n\n` +
+                text: `✅ **Payment Successful!**\n\n` +
                       `🎉 Your booking for **${paymentData.yachtName}** is confirmed!\n\n` +
                       `**Payment Details:**\n` +
                       `Payment ID: ${response.razorpay_payment_id}\n` +
@@ -250,15 +250,16 @@ export default function Chatbot({ onMessage }: { onMessage?: (message: any) => v
 
   return (
     <>
-      {/* Chat Button */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-accent text-primary rounded-full shadow-lg flex items-center justify-center font-bold text-2xl hover:shadow-xl transition-all z-50"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        💬
-      </motion.button>
+ {/* Chat Button */}
+<motion.button
+  onClick={() => setIsOpen(!isOpen)}
+  className="fixed bottom-6 right-6 w-16 h-16 gradient-ocean rounded-full flex items-center justify-center shadow-luxury text-white text-2xl hover:shadow-xl transition-all z-50"
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.95 }}
+>
+  💬
+</motion.button>
+
 
       {/* Chat Window */}
       <AnimatePresence>

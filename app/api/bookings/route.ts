@@ -4,7 +4,6 @@ import { checkYachtAvailability, createBooking, calculateBookingPrice } from "@/
 export async function POST(request: Request) {
   try {
     const { yachtId, startDate, endDate, guests } = await request.json()
-
     // Validate input
     if (!yachtId || !startDate || !endDate || !guests) {
       return Response.json(
@@ -23,14 +22,12 @@ export async function POST(request: Request) {
         { status: 401 }
       )
     }
-
     // Get yacht details for pricing
     const { data: yacht, error: yachtError } = await supabase
       .from('yachts')
       .select('*')
       .eq('id', yachtId)
       .single()
-
     if (yachtError || !yacht) {
       return Response.json(
         { success: false, error: 'Yacht not found' },
@@ -50,7 +47,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-
     // Create booking
     const bookingResult = await createBooking({
       yachtId,
@@ -60,14 +56,12 @@ export async function POST(request: Request) {
       guests,
       totalPrice: pricing.totalPrice
     })
-
     if (!bookingResult.success) {
       return Response.json(
         { success: false, error: bookingResult.error },
         { status: 400 }
       )
     }
-
     return Response.json({
       success: true,
       booking: bookingResult.booking,
@@ -77,7 +71,6 @@ export async function POST(request: Request) {
         remainingCapacity: availability.remainingCapacity
       }
     })
-
   } catch (error) {
     console.error('Booking API error:', error)
     return Response.json(
@@ -91,7 +84,6 @@ export async function GET(request: Request) {
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-
     if (authError || !user) {
       return Response.json(
         { success: false, error: 'Please log in to view bookings' },
@@ -140,7 +132,6 @@ export async function GET(request: Request) {
       success: true,
       bookings: bookings || []
     })
-
   } catch (error) {
     console.error('Get bookings API error:', error)
     return Response.json(

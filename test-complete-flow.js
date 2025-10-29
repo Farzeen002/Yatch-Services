@@ -21,7 +21,11 @@ async function testCompleteFlow() {
       
       if (response.ok) {
         const data = await response.json()
+<<<<<<< HEAD
         console.log(' Response:', data.response.substring(0, 200) + '...')
+=======
+        console.log('✅ Response:', data.response.substring(0, 200) + '...')
+>>>>>>> landing-video
         
         if (data.booking) {
           console.log('📋 Booking details:', data.booking)

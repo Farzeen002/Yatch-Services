@@ -1,6 +1,10 @@
 # 🚀 PRODUCTION SETUP GUIDE
 
+<<<<<<< HEAD
 ##  **REAL PAYMENT LINKS - NO MORE MOCK DATA**
+=======
+## ✅ **REAL PAYMENT LINKS - NO MORE MOCK DATA**
+>>>>>>> landing-video
 
 ### **🔧 STEP 1: Get Real Razorpay Credentials**
 
@@ -79,6 +83,7 @@ node test-production-real.js
 
 ---
 
+<<<<<<< HEAD
 ##  **EXPECTED RESULTS**
 
 ### ** Real Payment Links Generated:**
@@ -89,6 +94,18 @@ node test-production-real.js
 -  **Production Ready**: No mock data, real payments
 
 ### ** Payment Flow:**
+=======
+## 🎯 **EXPECTED RESULTS**
+
+### **✅ Real Payment Links Generated:**
+
+- ✅ **Clickable Payment Button**: Blue button in chat
+- ✅ **Real Razorpay URL**: `https://checkout.razorpay.com/v1/checkout.js?key_id=...&order_id=...`
+- ✅ **Secure Checkout**: Real Razorpay payment page
+- ✅ **Production Ready**: No mock data, real payments
+
+### **✅ Payment Flow:**
+>>>>>>> landing-video
 
 1. **User books yacht** → Chatbot responds
 2. **Payment button appears** → Clickable blue button
@@ -110,10 +127,17 @@ node test-production-real.js
 
 ### **Expected Results:**
 
+<<<<<<< HEAD
 -  **Payment button appears** in chat
 -  **Button is clickable** and opens Razorpay
 -  **Real payment processing** (no mock data)
 -  **Booking confirmation** after payment
+=======
+- ✅ **Payment button appears** in chat
+- ✅ **Button is clickable** and opens Razorpay
+- ✅ **Real payment processing** (no mock data)
+- ✅ **Booking confirmation** after payment
+>>>>>>> landing-video
 
 ---
 
@@ -121,11 +145,19 @@ node test-production-real.js
 
 Your yacht booking system now has:
 
+<<<<<<< HEAD
 -  **Real Razorpay Integration** (no mock data)
 -  **Clickable Payment Buttons** (blue buttons in chat)
 -  **Real Payment Processing** (actual money transactions)
 -  **Production Security** (RLS, audit logs)
 -  **Scalable Architecture** (ready for real users)
+=======
+- ✅ **Real Razorpay Integration** (no mock data)
+- ✅ **Clickable Payment Buttons** (blue buttons in chat)
+- ✅ **Real Payment Processing** (actual money transactions)
+- ✅ **Production Security** (RLS, audit logs)
+- ✅ **Scalable Architecture** (ready for real users)
+>>>>>>> landing-video
 
 **This is now a REAL business system that can handle actual payments!** 🚢💳✨
 

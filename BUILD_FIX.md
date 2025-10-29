@@ -1,10 +1,18 @@
 # 🔧 Build Error Fix - Razorpay Configuration
 
+<<<<<<< HEAD
 ##  Fixed!
 
 The build error you encountered has been **fixed**. The issue was that Razorpay was being initialized at build time when environment variables weren't available.
 
 ##  What Was Changed
+=======
+## ✅ Fixed!
+
+The build error you encountered has been **fixed**. The issue was that Razorpay was being initialized at build time when environment variables weren't available.
+
+## 🎯 What Was Changed
+>>>>>>> landing-video
 
 ### 1. **Lazy Initialization**
 
@@ -21,7 +29,11 @@ const razorpay = new Razorpay({
 To:
 
 ```typescript
+<<<<<<< HEAD
 //  NEW - Only initialized when actually used
+=======
+// ✅ NEW - Only initialized when actually used
+>>>>>>> landing-video
 function getRazorpayInstance() {
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -52,9 +64,15 @@ if (
 
 ### 3. **Files Fixed**
 
+<<<<<<< HEAD
 -  `app/api/payments-bot/create-order-bot/route.ts`
 -  `app/api/payments-bot/create-razorpay-order-bot/route.ts`
 -  `app/api/payments-bot/verify-bot/route.ts`
+=======
+- ✅ `app/api/payments-bot/create-order-bot/route.ts`
+- ✅ `app/api/payments-bot/create-razorpay-order-bot/route.ts`
+- ✅ `app/api/payments-bot/verify-bot/route.ts`
+>>>>>>> landing-video
 
 ---
 
@@ -70,10 +88,17 @@ npm run build
 
 **What works:**
 
+<<<<<<< HEAD
 -  All chatbot features
 -  Yacht browsing and search
 -  Booking flow (except final payment)
 -  All UI components
+=======
+- ✅ All chatbot features
+- ✅ Yacht browsing and search
+- ✅ Booking flow (except final payment)
+- ✅ All UI components
+>>>>>>> landing-video
 
 **What's disabled:**
 
@@ -125,7 +150,11 @@ RAZORPAY_KEY_SECRET=your_razorpay_secret
 
 ---
 
+<<<<<<< HEAD
 ##  Testing the Fix
+=======
+## ✅ Testing the Fix
+>>>>>>> landing-video
 
 ### 1. Build Test
 
@@ -133,7 +162,11 @@ RAZORPAY_KEY_SECRET=your_razorpay_secret
 npm run build
 ```
 
+<<<<<<< HEAD
 Should complete **without errors** 
+=======
+Should complete **without errors** ✅
+>>>>>>> landing-video
 
 ### 2. Run in Production Mode
 
@@ -177,12 +210,20 @@ Found → Initializes Razorpay
    ↓
 Creates payment order
    ↓
+<<<<<<< HEAD
 User completes payment 
+=======
+User completes payment ✅
+>>>>>>> landing-video
 ```
 
 ---
 
+<<<<<<< HEAD
 ##  Summary
+=======
+## 🎯 Summary
+>>>>>>> landing-video
 
 ### Before Fix:
 
@@ -192,10 +233,17 @@ User completes payment
 
 ### After Fix:
 
+<<<<<<< HEAD
 -  Build succeeds without Razorpay configured
 -  Payment features gracefully disabled if not configured
 -  Can develop and test without payment setup
 -  Easy to add Razorpay later for production
+=======
+- ✅ Build succeeds without Razorpay configured
+- ✅ Payment features gracefully disabled if not configured
+- ✅ Can develop and test without payment setup
+- ✅ Easy to add Razorpay later for production
+>>>>>>> landing-video
 
 ---
 
@@ -240,6 +288,10 @@ npm run build
 
 ---
 
+<<<<<<< HEAD
 **Status:**  **Build Issue Resolved**  
+=======
+**Status:** ✅ **Build Issue Resolved**  
+>>>>>>> landing-video
 **Version:** 1.0.2  
 **Date:** October 27, 2025
